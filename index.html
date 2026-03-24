@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WC2026 Predictor</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card2: #22263a;
+    --accent: #3b82f6;
+    --accent2: #10b981;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --border: #2d3148;
+    --gold: #f59e0b;
+    --silver: #94a3b8;
+    --bronze: #b45309;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .logo span { color: var(--accent); }
+  .sync-btn {
+    background: var(--accent); color: #fff; border: none;
+    padding: 8px 16px; border-radius: var(--radius-sm);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: background 0.2s;
+  }
+  .sync-btn:hover { background: #2563eb; }
+  .sync-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .tabs {
+    display: flex; background: var(--card);
+    border-bottom: 1px solid var(--border); padding: 0 20px;
+  }
+  .tab {
+    padding: 14px 20px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 600; color: var(--muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s; user-select: none;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  main { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .stage-header {
+    font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin: 24px 0 10px; padding-left: 4px;
+  }
+
+  /* MATCH CARD */
+  .match-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 10px;
+    overflow: hidden; transition: border-color 0.2s;
+  }
+  .match-card:hover { border-color: #3b4268; }
+
+  .match-row {
+    display: flex; align-items: center;
+    padding: 14px 12px; gap: 8px;
+    cursor: pointer; user-select: none;
+  }
+
+  /* Team name cells */
+  .team-cell {
+    flex: 1; display: flex; align-items: center;
+    min-width: 0;
+  }
+  .team-cell.home { justify-content: flex-end; }
+  .team-cell.away { justify-content: flex-start; }
+  .team-name {
+    font-weight: 600; font-size: 0.92rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .team-cell.home .team-name { text-align: right; }
+  .team-cell.away .team-name { text-align: left; }
+
+  /* Centre score block */
+  .centre-block {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 5px;
+    min-width: 110px; flex-shrink: 0;
+  }
+  .score-row { display: flex; align-items: center; gap: 5px; }
+  .score-box {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.95rem;
+  }
+  .score-box.final { background: #1e293b; color: var(--accent2); }
+  .score-box.pending { color: var(--muted); font-size: 0.78rem; }
+  .score-sep { color: var(--muted); font-weight: 700; font-size: 0.9rem; }
+  .match-meta { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+  .badge {
+    font-size: 0.65rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+  }
+  .badge.upcoming { background: #1e293b; color: var(--muted); }
+  .badge.finished { background: #14532d; color: var(--accent2); }
+
+  .expand-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 1rem;
+    padding: 4px 8px; border-radius: 6px; flex-shrink: 0;
+    transition: color 0.2s, background 0.2s; line-height: 1;
+  }
+  .expand-btn:hover { color: var(--text); background: var(--card2); }
+
+  /* PREDICTIONS PANEL */
+  .predictions-panel {
+    display: none; background: var(--card2);
+    border-top: 1px solid var(--border); padding: 14px 16px;
+  }
+  .predictions-panel.open { display: block; }
+  .pred-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: 10px;
+  }
+  .pred-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .pred-name {
+    font-size: 0.72rem; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .pred-score-row { display: flex; align-items: center; gap: 6px; }
+  .pred-input {
+    width: 38px; height: 36px;
+    background: var(--card2); border: 1.5px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-size: 1rem; font-weight: 700; text-align: center; outline: none;
+    transition: border-color 0.2s; -moz-appearance: textfield;
+  }
+  .pred-input::-webkit-outer-spin-button,
+  .pred-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .pred-input:focus { border-color: var(--accent); }
+  .pred-input:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; border-color: transparent; }
+  .pred-sep { color: var(--muted); font-weight: 700; }
+  .points-pill {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 3px 8px; border-radius: 10px; align-self: flex-start;
+  }
+  .points-pill.p3  { background: #14532d; color: #4ade80; }
+  .points-pill.p1  { background: #1e3a5f; color: #60a5fa; }
+  .points-pill.p0  { background: #2d1b1b; color: #f87171; }
+  .points-pill.pnd { background: #1e293b; color: var(--muted); }
+
+  /* LEADERBOARD */
+  .lb-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 64px 52px 52px;
+    align-items: center; padding: 14px 16px; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row.header {
+    background: var(--card2);
+    font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; color: var(--muted); letter-spacing: 0.06em;
+  }
+  .rank { font-size: 1rem; font-weight: 800; text-align: center; }
+  .rank.r1 { color: var(--gold); }
+  .rank.r2 { color: var(--silver); }
+  .rank.r3 { color: var(--bronze); }
+  .lb-name { font-weight: 600; }
+  .lb-pts  { font-weight: 800; font-size: 1rem; color: var(--accent2); text-align: center; }
+  .lb-num  { text-align: center; font-size: 0.9rem; }
+
+  .state-msg { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 0.9rem; }
+
+  .toast {
+    position: fixed; bottom: 24px;
+    left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1e293b; border: 1px solid var(--accent2);
+    color: var(--accent2); padding: 10px 20px; border-radius: var(--radius-sm);
+    font-size: 0.85rem; font-weight: 600;
+    opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap;
+  }
+  .toast.error { border-color: #ef4444; color: #ef4444; }
+  .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) {
+    .team-name { font-size: 0.8rem; }
+    .centre-block { min-width: 90px; }
+    .score-box { width: 28px; height: 28px; font-size: 0.85rem; }
+    .pred-grid { grid-template-columns: 1fr 1fr; }
+    .lb-row { grid-template-columns: 36px 1fr 52px 42px 42px; padding: 11px; font-size: 0.83rem; }
+    .tab { padding: 12px 16px; font-size: 0.85rem; }
+    .sync-btn .label { display: none; }
+    main { padding: 16px 10px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚽ <span>WC2026</span> Predictor</div>
+  <button class="sync-btn" id="syncBtn" onclick="syncAll()">
+    <span>🔄</span><span class="label"> Sync</span>
+  </button>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('predict', this)">🗓 Predict</div>
+  <div class="tab"        onclick="switchTab('leaderboard', this)">🏆 Leaderboard</div>
+</div>
+
+<main>
+  <div id="predict"     class="tab-content active">
+    <div id="matchList"><div class="state-msg">Loading matches…</div></div>
+  </div>
+  <div id="leaderboard" class="tab-content">
+    <div id="lbList"><div class="state-msg">Loading leaderboard…</div></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://d369cipp2c.execute-api.us-east-1.amazonaws.com';
+const STAGE_LABEL = { group:'Group Stage', r16:'Round of 16', qf:'Quarter Finals', sf:'Semi Finals', final:'Final' };
+
+let matches = [];
+let users   = [];
+
+// ── Boot ───────────────────────────────────────────────────
+async function boot() {
+  try {
+    const [mu, mm] = await Promise.all([
+      fetch(API + '/users').then(r => r.json()),
+      fetch(API + '/matches').then(r => r.json()),
+    ]);
+    users   = mu;
+    matches = mm;
+    renderMatches();
+  } catch(e) {
+    document.getElementById('matchList').innerHTML =
+      '<div class="state-msg">⚠️ Could not load data.</div>';
+    showToast('Failed to load', true);
+  }
+}
+
+// ── Parse kickoff always as UTC ────────────────────────────
+function parseUTC(str) {
+  if (!str) return null;
+  // Ensure the string is treated as UTC by appending Z if no tz info
+  if (!str.endsWith('Z') && !str.includes('+') && !str.match(/[+-]\d{2}:\d{2}$/)) {
+    str = str + 'Z';
+  }
+  return new Date(str);
+}
+
+function formatDate(dt) {
+  return dt.toLocaleDateString('en-IN', { day:'numeric', month:'short', timeZone:'Asia/Kolkata' });
+}
+function formatTime(dt) {
+  return dt.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Kolkata' }) + ' IST';
+}
+
+// ── Tab switch ─────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'leaderboard') renderLeaderboard();
+}
+
+// ── Render Matches ─────────────────────────────────────────
+function renderMatches() {
+  const container = document.getElementById('matchList');
+  if (!matches.length) {
+    container.innerHTML = '<div class="state-msg">No matches yet.</div>';
+    return;
+  }
+
+  let html = '';
+  let lastStage = null;
+
+  matches.forEach(m => {
+    if (m.stage !== lastStage) {
+      html += `<div class="stage-header">${STAGE_LABEL[m.stage] || m.stage}</div>`;
+      lastStage = m.stage;
+    }
+
+    const finished  = m.status === 'FINISHED';
+    const kickoffDt = parseUTC(m.kickoff);
+    const now       = new Date();
+    const locked    = finished || (kickoffDt && kickoffDt <= now);
+
+    const dateStr = kickoffDt ? formatDate(kickoffDt) : '—';
+    const timeStr = kickoffDt ? formatTime(kickoffDt) : '';
+
+    const homeTeam = m.team_home || 'TBD';
+    const awayTeam = m.team_away || 'TBD';
+
+    const scoreHome = finished
+      ? `<div class="score-box final">${m.score_home}</div>`
+      : `<div class="score-box pending">?</div>`;
+    const scoreAway = finished
+      ? `<div class="score-box final">${m.score_away}</div>`
+      : `<div class="score-box pending">?</div>`;
+
+    const badge = finished
+      ? `<div class="badge finished">FT</div>`
+      : `<div class="badge upcoming">${dateStr}</div>`;
+
+    // Predictions panel
+    let predsHtml = '';
+    if (users.length) {
+      predsHtml = '<div class="pred-grid">';
+      users.forEach(u => {
+        const pred = (m.predictions || {})[u.user_id];
+        const ph   = pred != null ? pred.pred_home : '';
+        const pa   = pred != null ? pred.pred_away : '';
+        const pts  = pred ? pred.points : null;
+
+        let pill = '<div class="points-pill pnd">—</div>';
+        if (finished) {
+          if (pred == null)   pill = '<div class="points-pill p0">No pick</div>';
+          else if (pts === 3) pill = '<div class="points-pill p3">+3 Exact!</div>';
+          else if (pts === 1) pill = '<div class="points-pill p1">+1 Correct</div>';
+          else                pill = '<div class="points-pill p0">+0</div>';
+        }
+
+        const dis = locked ? 'disabled' : '';
+        predsHtml += `
+          <div class="pred-item">
+            <div class="pred-name">${escHtml(u.display_name)}</div>
+            <div class="pred-score-row">
+              <input class="pred-input" type="number" min="0" max="20"
+                placeholder="–" value="${ph}" ${dis}
+                onblur="savePred(this,'${m.match_id}','${u.user_id}','home')" />
+              <div class="pred-sep">:</div>
+              <input class="pred-input" type="number" min="0" max="20"
+                placeholder="–" value="${pa}" ${dis}
+                onblur="savePred(this,'${m.match_id}','${u.user_id}','away')" />
+            </div>
+            ${pill}
+          </div>`;
+      });
+      predsHtml += '</div>';
+    } else {
+      predsHtml = '<div style="color:var(--muted);font-size:0.85rem;">No players added yet.</div>';
+    }
+
+    html += `
+      <div class="match-card">
+        <div class="match-row" onclick="togglePanel(this)">
+          <div class="team-cell home">
+            <div class="team-name">${escHtml(homeTeam)}</div>
+          </div>
+          <div class="centre-block">
+            <div class="score-row">${scoreHome}<div class="score-sep">:</div>${scoreAway}</div>
+            ${badge}
+            <div class="match-meta">${timeStr}</div>
+          </div>
+          <div class="team-cell away">
+            <div class="team-name">${escHtml(awayTeam)}</div>
+          </div>
+          <button class="expand-btn">▾</button>
+        </div>
+        <div class="predictions-panel">${predsHtml}</div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ── Render Leaderboard ─────────────────────────────────────
+function renderLeaderboard() {
+  const container = document.getElementById('lbList');
+  fetch(API + '/leaderboard')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.length) {
+        container.innerHTML = '<div class="state-msg">No players yet.</div>';
+        return;
+      }
+      const rankIcon = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      const rankCls  = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+      let html = `
+        <div class="lb-card">
+          <div class="lb-row header">
+            <div>#</div><div>Player</div>
+            <div style="text-align:center">Points</div>
+            <div style="text-align:center">🎯</div>
+            <div style="text-align:center">✅</div>
+          </div>`;
+      data.forEach((u, i) => {
+        html += `
+          <div class="lb-row">
+            <div class="rank ${rankCls(i)}">${rankIcon(i)}</div>
+            <div class="lb-name">${escHtml(u.display_name)}</div>
+            <div class="lb-pts">${u.total_points ?? 0}</div>
+            <div class="lb-num">${u.exact  ?? '—'}</div>
+            <div class="lb-num">${u.correct ?? '—'}</div>
+          </div>`;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    })
+    .catch(() => {
+      container.innerHTML = '<div class="state-msg">⚠️ Could not load leaderboard.</div>';
+    });
+}
+
+// ── Toggle prediction panel ────────────────────────────────
+function togglePanel(row) {
+  const panel = row.nextElementSibling;
+  const btn   = row.querySelector('.expand-btn');
+  if (!panel) return;
+  const open = panel.classList.toggle('open');
+  btn.textContent = open ? '▴' : '▾';
+}
+
+// ── Save prediction (waits for both fields) ────────────────
+const predBuffer = {};
+function savePred(input, matchId, userId, side) {
+  const val = input.value.trim();
+  if (val === '') return;
+  const key = `${matchId}__${userId}`;
+  predBuffer[key] = predBuffer[key] || {};
+  predBuffer[key][side] = parseInt(val, 10);
+  const buf = predBuffer[key];
+  if (buf.home === undefined || buf.away === undefined) return;
+
+  const payload = { user_id: userId, match_id: matchId, pred_home: buf.home, pred_away: buf.away };
+  delete predBuffer[key];
+
+  fetch(API + '/predictions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.status === 'saved') showToast(`Saved ✓`);
+    else showToast(d.error || 'Error saving', true);
+  })
+  .catch(() => showToast('Network error', true));
+}
+
+// ── Sync ───────────────────────────────────────────────────
+async function syncAll() {
+  const btn = document.getElementById('syncBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span><span class="label"> Syncing…</span>';
+  try {
+    const data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
+    showToast(`✅ Synced ${data.count} match${data.count !== 1 ? 'es' : ''}`);
+    const [mu, mm] = await Promise.all([
+      fetch(API + '/users').then(r => r.json()),
+      fetch(API + '/matches').then(r => r.json()),
+    ]);
+    users = mu; matches = mm;
+    renderMatches();
+    if (document.getElementById('leaderboard').classList.contains('active')) {
+      renderLeaderboard();
+    }
+  } catch(e) {
+    showToast('Sync failed', true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔄</span><span class="label"> Sync</span>';
+  }
+}
+
+// ── Toast ──────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+boot();
+</script>
+</body>
+</html>
