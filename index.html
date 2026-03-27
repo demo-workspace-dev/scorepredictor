@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" href="award.png">
 <title>WC2026 Predictor</title>
 <style>
   :root {
@@ -21,7 +22,7 @@
     --radius-sm: 8px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  body { background: var(--bg); color: var(--text); font-family: Roboto, system-ui, sans-serif; min-height: 100vh; }
 
   header {
     background: var(--card);
@@ -45,6 +46,7 @@
   .tabs {
     display: flex; background: var(--card);
     border-bottom: 1px solid var(--border); padding: 0 20px;
+    position: sticky; top: 60px; z-index: 99;
   }
   .tab {
     padding: 14px 20px; cursor: pointer;
@@ -244,7 +246,7 @@
 <script>
 const API = 'https://d369cipp2c.execute-api.us-east-1.amazonaws.com';
 const STAGE_LABEL = { group:'Group Stage', r16:'Round of 16', qf:'Quarter Finals', sf:'Semi Finals', final:'Final' };
-
+const predBuffer = {}; // must be global
 let matches = [];
 let users   = [];
 
@@ -279,7 +281,7 @@ function formatDate(dt) {
   return dt.toLocaleDateString('en-IN', { day:'numeric', month:'short', timeZone:'Asia/Kolkata' });
 }
 function formatTime(dt) {
-  return dt.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Kolkata' }) + ' IST';
+  return dt.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Kolkata' }).toUpperCase() + ' IST';
 }
 
 // ── Tab switch ─────────────────────────────────────────────
@@ -439,32 +441,68 @@ function togglePanel(row) {
   btn.textContent = open ? '▴' : '▾';
 }
 
-// ── Save prediction (waits for both fields) ────────────────
-const predBuffer = {};
+const timers = {};
+
 function savePred(input, matchId, userId, side) {
   const val = input.value.trim();
   if (val === '') return;
+
   const key = `${matchId}__${userId}`;
-  predBuffer[key] = predBuffer[key] || {};
+
+  // ✅ Seed buffer from existing DOM values on first touch
+  if (!predBuffer[key]) {
+    const predItem  = input.closest('.pred-item');
+    const [hi, ai]  = predItem.querySelectorAll('.pred-input');
+    const hv = hi.value.trim();
+    const av = ai.value.trim();
+    predBuffer[key] = {
+      home: hv !== '' ? parseInt(hv, 10) : null,
+      away: av !== '' ? parseInt(av, 10) : null,
+    };
+  }
+
+  // Overwrite the side the user just edited
   predBuffer[key][side] = parseInt(val, 10);
-  const buf = predBuffer[key];
-  if (buf.home === undefined || buf.away === undefined) return;
 
-  const payload = { user_id: userId, match_id: matchId, pred_home: buf.home, pred_away: buf.away };
-  delete predBuffer[key];
+  if (timers[key]) clearTimeout(timers[key]);
 
-  fetch(API + '/predictions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.status === 'saved') showToast(`Saved ✓`);
-    else showToast(d.error || 'Error saving', true);
-  })
-  .catch(() => showToast('Network error', true));
+  timers[key] = setTimeout(() => {
+    const buf = predBuffer[key];
+    if (buf.home === null || buf.away === null) return;
+
+    const payload = {
+      user_id:   userId,
+      match_id:  matchId,
+      pred_home: buf.home,
+      pred_away: buf.away,
+    };
+
+    showToast('💾 Saving…');  // ✅ Intermediate status
+
+    fetch(API + '/predictions', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'saved') showToast('✅ Saved');
+      else showToast(d.error || 'Error saving', true);
+    })
+    .catch(() => showToast('Network error', true));
+  }, 50);
 }
+
+function showToast(msg, isError = false, persist = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  clearTimeout(toastTimer);
+  if (!persist) {
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1500);
+  }
+}
+
 
 // ── Sync ───────────────────────────────────────────────────
 async function syncAll() {
