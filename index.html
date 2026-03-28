@@ -251,20 +251,63 @@ const predBuffer = {}; // must be global
 let matches = [];
 let users   = [];
 
+// ── localStorage cache helpers ─────────────────────────────
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function cacheGet(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null; // expired
+    return data;
+  } catch { return null; }
+}
+
+function cacheSet(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
+  } catch {}
+}
+
 // ── Boot ───────────────────────────────────────────────────
 async function boot() {
+  // Step 1 — Render from localStorage immediately (instant on repeat visits)
+  const cachedUsers   = cacheGet('wc2026_users');
+  const cachedMatches = cacheGet('wc2026_matches');
+
+  if (cachedUsers && cachedMatches) {
+    users   = cachedUsers;
+    matches = cachedMatches;
+    renderMatches(); // ✅ Page renders before any network request
+  }
+
+  // Step 2 — Always fetch fresh data silently in the background
   try {
     const [mu, mm] = await Promise.all([
       fetch(API + '/users').then(r => r.json()),
       fetch(API + '/matches').then(r => r.json()),
     ]);
-    users   = mu;
-    matches = mm;
-    renderMatches();
+
+    cacheSet('wc2026_users',   mu);
+    cacheSet('wc2026_matches', mm);
+
+    // Only re-render if something actually changed
+    if (JSON.stringify(mu) !== JSON.stringify(matches) ||
+        JSON.stringify(mm) !== JSON.stringify(matches)) {
+      users   = mu;
+      matches = mm;
+      renderMatches();
+    }
+
   } catch(e) {
-    document.getElementById('matchList').innerHTML =
-      '<div class="state-msg">⚠️ Could not load data.</div>';
-    showToast('Failed to load', true);
+    if (!cachedUsers) {
+      // Only show error if we have nothing at all to display
+      document.getElementById('matchList').innerHTML =
+        '<div class="state-msg">⚠️ Could not load data.</div>';
+      showToast('Failed to load', true);
+    }
+    // If we had cached data, silently fail — user already sees content
   }
 }
 
@@ -513,11 +556,17 @@ async function syncAll() {
   try {
     const data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
     showToast(`✅ Synced ${data.count} match${data.count !== 1 ? 'es' : ''}`);
+
     const [mu, mm] = await Promise.all([
       fetch(API + '/users').then(r => r.json()),
       fetch(API + '/matches').then(r => r.json()),
     ]);
     users = mu; matches = mm;
+
+    // ✅ Update cache after sync
+    cacheSet('wc2026_users',   mu);
+    cacheSet('wc2026_matches', mm);
+
     renderMatches();
     if (document.getElementById('leaderboard').classList.contains('active')) {
       renderLeaderboard();
