@@ -601,381 +601,253 @@
 
   <div class="toast" id="toast"></div>
 
-  <script>
-    const API = 'https://sparkling-frost-59a4.satyajeetking.workers.dev';
-    const STAGE_LABEL = {
-      group: 'Group Stage',
-      r32: 'Round of 32',    // ✅ NEW
-      r16: 'Round of 16',
-      qf: 'Quarter Finals',
-      sf: 'Semi Finals',
-      third: 'Third Place',    // ✅ NEW
-      final: 'Final',
-    };
-    const predBuffer = {};
-    let matches = [];
-    let users = [];
-    let toastTimer;
+<script>
+const API = 'https://sparkling-frost-59a4.satyajeetking.workers.dev';
 
-    // ── localStorage: paint-only, no TTL ──────────────────────
-    // Only purpose: make repeat visits render instantly.
-    // Fresh data is ALWAYS fetched from network regardless.
-    function cachePaint(key) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        // Unwrap old { data, ts } format left over from previous version
-        if (parsed && !Array.isArray(parsed) && parsed.data !== undefined)
-          return parsed.data;
-        return parsed;
-      } catch { return null; }
-    }
-    function cacheSave(key, data) {
-      try { localStorage.setItem(key, JSON.stringify(data)); }
-      catch { }
+const STAGE_LABEL = {
+  group: 'Group Stage',
+  r32: 'Round of 32',
+  r16: 'Round of 16',
+  qf: 'Quarter Finals',
+  sf: 'Semi Finals',
+  third: 'Third Place',
+  final: 'Final',
+};
+
+let matches = [];
+let users = [];
+let toastTimer;
+
+// ── Cache ─────────────────────────
+function cachePaint(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && !Array.isArray(parsed) && parsed.data !== undefined)
+      return parsed.data;
+    return parsed;
+  } catch { return null; }
+}
+function cacheSave(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); }
+  catch {}
+}
+
+// ── Skeleton ──────────────────────
+function renderSkeleton() {
+  const cards = Array.from({ length: 6 }, () => `
+    <div class="skeleton-card">
+      <div class="skeleton sk-team"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="skeleton sk-score"></div>
+        <div class="skeleton sk-meta"></div>
+      </div>
+      <div class="skeleton sk-team"></div>
+    </div>`).join('');
+  document.getElementById('matchList').innerHTML =
+    '<div class="stage-header">Loading…</div>' + cards;
+}
+
+// ── Boot ──────────────────────────
+async function boot() {
+  const paintUsers = cachePaint('wc2026_users');
+  const paintMatches = cachePaint('wc2026_matches');
+
+  const hasValidCache =
+    Array.isArray(paintUsers) && paintUsers.length > 0 &&
+    Array.isArray(paintMatches) && paintMatches.length > 0;
+
+  if (hasValidCache) {
+    users = paintUsers;
+    matches = paintMatches;
+    renderMatches({ hidePredictions: true });
+  } else {
+    renderSkeleton();
+  }
+
+  try {
+    const [mu, mm] = await Promise.all([
+      fetch(API + '/users').then(r => r.json()),
+      fetch(API + '/matches').then(r => r.json()),
+    ]);
+
+    users = mu;
+    matches = mm;
+
+    cacheSave('wc2026_users', mu);
+    cacheSave('wc2026_matches', mm);
+
+    // 👉 If UI already rendered → update only predictions
+    if (document.querySelector('.match-card')) {
+      updatePredictionsOnly(mm);
+    } else {
+      renderMatches({ hidePredictions: false });
     }
 
-    // ── Skeleton ───────────────────────────────────────────────
-    function renderSkeleton() {
-      const cards = Array.from({ length: 6 }, () => `
-        <div class="skeleton-card">
-          <div class="skeleton sk-team"></div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-            <div class="skeleton sk-score"></div>
-            <div class="skeleton sk-meta"></div>
-          </div>
-          <div class="skeleton sk-team"></div>
-        </div>`).join('');
+  } catch (e) {
+    if (!hasValidCache) {
       document.getElementById('matchList').innerHTML =
-        '<div class="stage-header">Loading…</div>' + cards;
+        '<div class="state-msg">⚠️ Could not load data.</div>';
+      showToast('Failed to load', true);
+    }
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) boot();
+});
+
+// ── Helpers ───────────────────────
+function parseUTC(str) {
+  if (!str) return null;
+  if (!str.endsWith('Z') && !str.includes('+')) str += 'Z';
+  return new Date(str);
+}
+function formatDate(dt) {
+  return dt.toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata'
+  });
+}
+function formatTime(dt) {
+  return dt.toLocaleTimeString('en-IN', {
+    hour: '2-digit', minute: '2-digit',
+    hour12: true, timeZone: 'Asia/Kolkata'
+  }).toUpperCase() + ' IST';
+}
+
+// ── Render Matches ─────────────────
+function renderMatches(options = { hidePredictions: false }) {
+  const container = document.getElementById('matchList');
+
+  if (!matches.length) {
+    container.innerHTML = '<div class="state-msg">No matches yet.</div>';
+    return;
+  }
+
+  let html = '';
+  let lastStage = null;
+
+  matches.forEach(m => {
+    if (m.stage !== lastStage) {
+      html += `<div class="stage-header">${STAGE_LABEL[m.stage] || m.stage}</div>`;
+      lastStage = m.stage;
     }
 
-    // ── Boot ───────────────────────────────────────────────────
-    async function boot() {
-      const paintUsers = cachePaint('wc2026_users');
-      const paintMatches = cachePaint('wc2026_matches');
+    const kickoffDt = parseUTC(m.kickoff);
+    const dateStr = kickoffDt ? formatDate(kickoffDt) : '—';
+    const timeStr = kickoffDt ? formatTime(kickoffDt) : '';
 
-      // ✅ Must be a real non-empty array — not null, not {}, not []
-      const hasValidCache = Array.isArray(paintUsers) && paintUsers.length > 0 &&
-        Array.isArray(paintMatches) && paintMatches.length > 0;
+    let predsHtml = '';
 
-      if (hasValidCache) {
-        users = paintUsers;
-        matches = paintMatches;
-
-        // 👇 render WITHOUT predictions first
-        renderMatches({ hidePredictions: true });
-      } else {
-        renderSkeleton();
-      }
-
-      // Always fetch fresh regardless
-      try {
-        const [mu, mm] = await Promise.all([
-          fetch(API + '/users').then(r => r.json()),
-          fetch(API + '/matches').then(r => r.json()),
-        ]);
-
-        cacheSave('wc2026_users', mu);
-        cacheSave('wc2026_matches', mm);
-
-        if (JSON.stringify(mu) !== JSON.stringify(users) ||
-          JSON.stringify(mm) !== JSON.stringify(matches)) {
-          users = mu;
-          matches = mm;
-
-          // save cache
-          cacheSave('wc2026_users', mu);
-          cacheSave('wc2026_matches', mm);
-
-          // 👇 now render WITH predictions
-          renderMatches({ hidePredictions: false });
-        }
-
-      } catch (e) {
-        if (!hasValidCache) {
-          document.getElementById('matchList').innerHTML =
-            '<div class="state-msg">⚠️ Could not load data.</div>';
-          showToast('Failed to load', true);
-        }
-      }
-    }
-    // Refresh when user switches back to the tab / app on mobile
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) boot();
-    });
-
-    // ── Parse kickoff as UTC ───────────────────────────────────
-    function parseUTC(str) {
-      if (!str) return null;
-      if (!str.endsWith('Z') && !str.includes('+') && !str.match(/[+-]\d{2}:\d{2}$/))
-        str = str + 'Z';
-      return new Date(str);
-    }
-    function formatDate(dt) {
-      return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
-    }
-    function formatTime(dt) {
-      return dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).toUpperCase() + ' IST';
-    }
-
-    // ── Tab switch ─────────────────────────────────────────────
-    function switchTab(id, el) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      el.classList.add('active');
-      if (id === 'leaderboard') renderLeaderboard();
-    }
-
-    // ── Render Matches ─────────────────────────────────────────
-    function renderMatches(options = {}) {
-      const container = document.getElementById('matchList');
-      if (!matches.length) {
-        container.innerHTML = '<div class="state-msg">No matches yet.</div>';
-        return;
-      }
-
-      let html = '';
-      let lastStage = null;
-
-      matches.forEach(m => {
-        if (m.stage !== lastStage) {
-          html += `<div class="stage-header">${STAGE_LABEL[m.stage] || m.stage}</div>`;
-          lastStage = m.stage;
-        }
-
-        const finished = m.status === 'FINISHED';
-        const kickoffDt = parseUTC(m.kickoff);
-        const now = new Date();
-        const locked = finished || (kickoffDt && kickoffDt <= now);
-
-        const dateStr = kickoffDt ? formatDate(kickoffDt) : '—';
-        const timeStr = kickoffDt ? formatTime(kickoffDt) : '';
-
-        const homeTeam = m.team_home || 'TBD';
-        const awayTeam = m.team_away || 'TBD';
-
-        const scoreHome = finished
-          ? `<div class="score-box final">${m.score_home}</div>`
-          : `<div class="score-box pending">?</div>`;
-        const scoreAway = finished
-          ? `<div class="score-box final">${m.score_away}</div>`
-          : `<div class="score-box pending">?</div>`;
-
-        const badge = finished
-          ? `<div class="badge finished">FT</div>`
-          : `<div class="badge upcoming">${dateStr}</div>`;
-
-        let predsHtml = '';
-
-        if (options.hidePredictions) {
-          predsHtml = `
-    <div class="pred-grid">
-      ${Array.from({ length: 4 }).map(() => `
-        <div class="pred-item">
-          <div class="skeleton sk-meta" style="width:70px;"></div>
-          <div class="pred-score-row">
-            <div class="skeleton sk-score"></div>
-            <div class="pred-sep">:</div>
-            <div class="skeleton sk-score"></div>
-          </div>
-        </div>
-      `).join('')}
-    </div>`;
-        }
-        else if (users.length) {
-          predsHtml = '<div class="pred-grid">';
-          users.forEach(u => {
-            const pred = (m.predictions || {})[u.user_id];
-            const ph = pred != null ? pred.pred_home : '';
-            const pa = pred != null ? pred.pred_away : '';
-            const pts = pred ? pred.points : null;
-
-            let pill = '<div class="points-pill pnd">—</div>';
-            if (finished) {
-              if (pred == null) pill = '<div class="points-pill p0">No pick</div>';
-              else if (pts === 3) pill = '<div class="points-pill p3">+3 Exact!</div>';
-              else if (pts === 1) pill = '<div class="points-pill p1">+1 Correct</div>';
-              else pill = '<div class="points-pill p0">+0</div>';
-            }
-
-            const dis = locked ? 'disabled' : '';
-            predsHtml += `
-              <div class="pred-item">
-                <div class="pred-name">${escHtml(u.display_name)}</div>
-                <div class="pred-score-row">
-                  <input class="pred-input" type="number" min="0" max="20"
-                    placeholder="–" value="${ph}" ${dis}
-                    onblur="savePred(this,'${m.match_id}','${u.user_id}','home')" />
-                  <div class="pred-sep">:</div>
-                  <input class="pred-input" type="number" min="0" max="20"
-                    placeholder="–" value="${pa}" ${dis}
-                    onblur="savePred(this,'${m.match_id}','${u.user_id}','away')" />
-                </div>
-                ${pill}
-              </div>`;
-          });
-          predsHtml += '</div>';
-        } else {
-          predsHtml = '<div style="color:var(--muted);font-size:0.85rem;">No players added yet.</div>';
-        }
-
-        html += `
-          <div class="match-card">
-            <div class="match-row" onclick="togglePanel(this)">
-              <div class="team-cell home"><div class="team-name">${escHtml(homeTeam)}</div></div>
-              <div class="centre-block">
-                <div class="score-row">${scoreHome}<div class="score-sep">:</div>${scoreAway}</div>
-                ${badge}
-                <div class="match-meta">${timeStr}</div>
+    if (options.hidePredictions) {
+      predsHtml = `
+        <div class="pred-grid">
+          ${Array.from({ length: 4 }).map(() => `
+            <div class="pred-item">
+              <div class="skeleton sk-meta" style="width:70px;"></div>
+              <div class="pred-score-row">
+                <div class="skeleton sk-score"></div>
+                <div class="pred-sep">:</div>
+                <div class="skeleton sk-score"></div>
               </div>
-              <div class="team-cell away"><div class="team-name">${escHtml(awayTeam)}</div></div>
-              <button class="expand-btn">▾</button>
             </div>
-            <div class="predictions-panel">${predsHtml}</div>
+          `).join('')}
+        </div>`;
+    } else if (users.length) {
+      predsHtml = '<div class="pred-grid">';
+
+      users.forEach(u => {
+        const pred = (m.predictions || {})[u.user_id];
+        const ph = pred ? pred.pred_home : '';
+        const pa = pred ? pred.pred_away : '';
+
+        predsHtml += `
+          <div class="pred-item">
+            <div class="pred-name">${escHtml(u.display_name)}</div>
+            <div class="pred-score-row">
+              <input 
+                id="pred-${m.match_id}-${u.user_id}-home"
+                class="pred-input"
+                value="${ph}"
+              />
+              <div class="pred-sep">:</div>
+              <input 
+                id="pred-${m.match_id}-${u.user_id}-away"
+                class="pred-input"
+                value="${pa}"
+              />
+            </div>
           </div>`;
       });
 
-      container.innerHTML = html;
+      predsHtml += '</div>';
     }
 
-    // ── Render Leaderboard ─────────────────────────────────────
-    function renderLeaderboard() {
-      const container = document.getElementById('lbList');
-      fetch(API + '/leaderboard')
-        .then(r => r.json())
-        .then(data => {
-          if (!data.length) {
-            container.innerHTML = '<div class="state-msg">No players yet.</div>';
-            return;
-          }
-          const rankIcon = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-          const rankCls = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
-          let html = `
-            <div class="lb-card">
-              <div class="lb-row header">
-                <div>#</div><div>Player</div>
-                <div style="text-align:center">Points</div>
-                <div style="text-align:center">🎯</div>
-                <div style="text-align:center">✅</div>
-              </div>`;
-          data.forEach((u, i) => {
-            html += `
-              <div class="lb-row">
-                <div class="rank ${rankCls(i)}">${rankIcon(i)}</div>
-                <div class="lb-name">${escHtml(u.display_name)}</div>
-                <div class="lb-pts">${u.total_points ?? 0}</div>
-                <div class="lb-num">${u.exact ?? '—'}</div>
-                <div class="lb-num">${u.correct ?? '—'}</div>
-              </div>`;
-          });
-          html += '</div>';
-          container.innerHTML = html;
-        })
-        .catch(() => {
-          container.innerHTML = '<div class="state-msg">⚠️ Could not load leaderboard.</div>';
-        });
-    }
+    html += `
+      <div class="match-card">
+        <div class="match-row" onclick="togglePanel(this)">
+          <div class="team-cell home">${m.team_home}</div>
+          <div class="centre-block">
+            <div class="badge">${dateStr}</div>
+            <div class="match-meta">${timeStr}</div>
+          </div>
+          <div class="team-cell away">${m.team_away}</div>
+          <button class="expand-btn">▾</button>
+        </div>
+        <div class="predictions-panel">${predsHtml}</div>
+      </div>`;
+  });
 
-    // ── Toggle prediction panel ────────────────────────────────
-    function togglePanel(row) {
-      const panel = row.nextElementSibling;
-      const btn = row.querySelector('.expand-btn');
-      if (!panel) return;
-      const open = panel.classList.toggle('open');
-      btn.textContent = open ? '▴' : '▾';
-    }
+  container.innerHTML = html;
+}
 
-    // ── Save prediction ────────────────────────────────────────
-    const timers = {};
+// ── Update Predictions Only ───────
+function updatePredictionsOnly(newMatches) {
+  newMatches.forEach(m => {
+    if (!m.predictions) return;
 
-    function savePred(input, matchId, userId, side) {
-      const val = input.value.trim();
-      if (val === '') return;
+    Object.entries(m.predictions).forEach(([userId, pred]) => {
+      const homeEl = document.getElementById(`pred-${m.match_id}-${userId}-home`);
+      const awayEl = document.getElementById(`pred-${m.match_id}-${userId}-away`);
 
-      const key = `${matchId}__${userId}`;
+      if (homeEl && awayEl) {
+        if (homeEl.value != pred.pred_home)
+          homeEl.value = pred.pred_home ?? '';
 
-      if (!predBuffer[key]) {
-        const predItem = input.closest('.pred-item');
-        const [hi, ai] = predItem.querySelectorAll('.pred-input');
-        predBuffer[key] = {
-          home: hi.value.trim() !== '' ? parseInt(hi.value, 10) : null,
-          away: ai.value.trim() !== '' ? parseInt(ai.value, 10) : null,
-        };
+        if (awayEl.value != pred.pred_away)
+          awayEl.value = pred.pred_away ?? '';
       }
+    });
+  });
 
-      predBuffer[key][side] = parseInt(val, 10);
-      if (timers[key]) clearTimeout(timers[key]);
+  // remove skeleton leftovers
+  document.querySelectorAll('.skeleton').forEach(el => el.remove());
+}
 
-      timers[key] = setTimeout(() => {
-        const buf = predBuffer[key];
-        if (buf.home === null || buf.away === null) return;
+// ── UI ───────────────────────────
+function togglePanel(row) {
+  const panel = row.nextElementSibling;
+  const btn = row.querySelector('.expand-btn');
+  const open = panel.classList.toggle('open');
+  btn.textContent = open ? '▴' : '▾';
+}
 
-        showToast('💾 Saving…');
-        fetch(API + '/predictions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: userId,
-            match_id: matchId,
-            pred_home: buf.home,
-            pred_away: buf.away,
-          }),
-        })
-          .then(r => r.json())
-          .then(d => {
-            if (d.status === 'saved') showToast('✅ Saved');
-            else showToast(d.error || 'Error saving', true);
-          })
-          .catch(() => showToast('Network error', true));
-      }, 50);
-    }
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
 
-    // ── Sync ───────────────────────────────────────────────────
-    async function syncAll() {
-      const btn = document.getElementById('syncBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span><span class="label"> Syncing…</span>';
-      try {
-        const data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
-        showToast(`✅ Synced ${data.count} match${data.count !== 1 ? 'es' : ''}`);
+function escHtml(s) {
+  return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;') : '';
+}
 
-        const [mu, mm] = await Promise.all([
-          fetch(API + '/users').then(r => r.json()),
-          fetch(API + '/matches').then(r => r.json()),
-        ]);
-        users = mu; matches = mm;
-        cacheSave('wc2026_users', mu);
-        cacheSave('wc2026_matches', mm);
-        renderMatches();
-        if (document.getElementById('leaderboard').classList.contains('active'))
-          renderLeaderboard();
-      } catch (e) {
-        showToast('Sync failed', true);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<span>🔄</span><span class="label"> Sync</span>';
-      }
-    }
+boot();
+</script>
 
-    // ── Toast ──────────────────────────────────────────────────
-    function showToast(msg, isError = false) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast' + (isError ? ' error' : '') + ' show';
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-    }
-
-    function escHtml(s) {
-      if (!s) return '';
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    boot();
-  </script>
 </body>
 
 </html>
