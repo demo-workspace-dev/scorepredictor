@@ -760,12 +760,20 @@
       }
     }
     // Refresh when user switches back to the tab / app on mobile
+    let lastVisibleTime = Date.now();
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        localStorage.removeItem('wc2026_users');
-        localStorage.removeItem('wc2026_matches');
-        localStorage.removeItem('wc2026_leaderboard');
-        boot();
+      if (document.hidden) {
+        // User switched away - record the time
+        lastVisibleTime = Date.now();
+      } else {
+        // User came back - check how long they were away
+        const awayTime = Date.now() - lastVisibleTime;
+        if (awayTime > 5 * 60 * 1000) { // 5 minutes
+          localStorage.removeItem('wc2026_users');
+          localStorage.removeItem('wc2026_matches');
+          localStorage.removeItem('wc2026_leaderboard');
+          boot();
+        }
       }
     });
 
