@@ -727,6 +727,7 @@
       if (hasValidCache) {
         users = paintUsers;
         matches = paintMatches;
+        sortUsersAlphabetically();
         renderMatches();
       } else {
         renderSkeleton(); // first visit OR stale/corrupt cache
@@ -746,6 +747,7 @@
           JSON.stringify(mm) !== JSON.stringify(matches)) {
           users = mu;
           matches = mm;
+          sortUsersAlphabetically();
           renderMatches();
         }
 
@@ -766,6 +768,11 @@
         boot();
       }
     });
+
+    // ── Sort users alphabetically ──────────────────────────────
+    function sortUsersAlphabetically() {
+      users.sort((a, b) => a.display_name.localeCompare(b.display_name));
+    }
 
     // ── Parse kickoff as UTC ───────────────────────────────────
     function parseUTC(str) {
@@ -918,6 +925,13 @@
         container.innerHTML = '<div class="state-msg">No players yet.</div>';
         return;
       }
+      // ✅ Sort: by points DESC, then by name ASC
+      data.sort((a, b) => {
+        if (b.total_points !== a.total_points) {
+          return b.total_points - a.total_points; // Higher points first
+        }
+        return a.display_name.localeCompare(b.display_name); // Then alphabetically
+      });
       const rankIcon = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
       const rankCls = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
       let html = `
@@ -1008,6 +1022,7 @@
           fetch(API + '/matches').then(r => r.json()),
         ]);
         users = mu; matches = mm;
+        sortUsersAlphabetically();
         cacheSave('wc2026_users', mu);
         cacheSave('wc2026_matches', mm);
         // Clear leaderboard cache so it refreshes
