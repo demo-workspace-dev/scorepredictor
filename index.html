@@ -772,9 +772,18 @@
 
         if (options.hidePredictions) {
           predsHtml = `
-          <div style="color:var(--muted);font-size:0.85rem;">
-            Loading predictions…
-            </div>`;
+    <div class="pred-grid">
+      ${Array.from({ length: 4 }).map(() => `
+        <div class="pred-item">
+          <div class="skeleton sk-meta" style="width:70px;"></div>
+          <div class="pred-score-row">
+            <div class="skeleton sk-score"></div>
+            <div class="pred-sep">:</div>
+            <div class="skeleton sk-score"></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
         }
         else if (users.length) {
           predsHtml = '<div class="pred-grid">';
