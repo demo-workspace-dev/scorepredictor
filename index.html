@@ -55,6 +55,49 @@
       margin-top: 6px;
     }
 
+    .sk-lb-row {
+      display: grid;
+      grid-template-columns: 44px 1fr 64px 52px 52px;
+      align-items: center;
+      padding: 14px 16px;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sk-rank {
+      height: 16px;
+      width: 24px;
+      margin: 0 auto;
+    }
+
+    .sk-name {
+      height: 14px;
+      width: 120px;
+    }
+
+    .sk-pts {
+      height: 16px;
+      width: 40px;
+      margin: 0 auto;
+    }
+
+    .sk-stat {
+      height: 14px;
+      width: 28px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 480px) {
+      .sk-lb-row {
+        grid-template-columns: 36px 1fr 52px 42px 42px;
+        padding: 11px;
+      }
+
+      .sk-name {
+        width: 90px;
+      }
+    }
+
     :root {
       --bg: #0f1117;
       --card: #1a1d27;
@@ -651,6 +694,27 @@
         '<div class="stage-header">Loading…</div>' + cards;
     }
 
+    function renderLeaderboardSkeleton() {
+      const rows = Array.from({ length: 8 }, () => `
+    <div class="sk-lb-row">
+      <div class="skeleton sk-rank"></div>
+      <div class="skeleton sk-name"></div>
+      <div class="skeleton sk-pts"></div>
+      <div class="skeleton sk-stat"></div>
+      <div class="skeleton sk-stat"></div>
+    </div>`).join('');
+      document.getElementById('lbList').innerHTML = `
+    <div class="lb-card">
+      <div class="lb-row header">
+        <div>#</div><div>Player</div>
+        <div style="text-align:center">Points</div>
+        <div style="text-align:center">Exact</div>
+        <div style="text-align:center">Result</div>
+      </div>
+      ${rows}
+    </div>`;
+    }
+
     // ── Boot ───────────────────────────────────────────────────
     async function boot() {
       const paintUsers = cachePaint('wc2026_users');
@@ -698,6 +762,7 @@
       if (!document.hidden) {
         localStorage.removeItem('wc2026_users');
         localStorage.removeItem('wc2026_matches');
+        localStorage.removeItem('wc2026_leaderboard');
         boot();
       }
     });
@@ -745,7 +810,8 @@
         const finished = m.status === 'FINISHED';
         const kickoffDt = parseUTC(m.kickoff);
         const now = new Date();
-        const locked = finished || (kickoffDt && kickoffDt <= now);
+        const lockTime = kickoffDt ? new Date(kickoffDt.getTime() + 60 * 60 * 1000) : null;  // ← 60 min grace period
+        const locked = finished || (lockTime && now >= lockTime);
 
         const dateStr = kickoffDt ? formatDate(kickoffDt) : '—';
         const timeStr = kickoffDt ? formatTime(kickoffDt) : '';
@@ -824,41 +890,57 @@
     // ── Render Leaderboard ─────────────────────────────────────
     function renderLeaderboard() {
       const container = document.getElementById('lbList');
+      // Check if we have cached leaderboard data
+      const cachedLB = cachePaint('wc2026_leaderboard');
+      if (cachedLB && Array.isArray(cachedLB) && cachedLB.length > 0) {
+        // Paint cached data immediately
+        renderLeaderboardData(cachedLB);
+      } else {
+        // Show skeleton
+        renderLeaderboardSkeleton();
+      }
+      // Always fetch fresh data
       fetch(API + '/leaderboard')
         .then(r => r.json())
         .then(data => {
-          if (!data.length) {
-            container.innerHTML = '<div class="state-msg">No players yet.</div>';
-            return;
-          }
-          const rankIcon = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-          const rankCls = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
-          let html = `
-            <div class="lb-card">
-              <div class="lb-row header">
-                <div>#</div><div>Player</div>
-                <div style="text-align:center">Points</div>
-                <div style="text-align:center">🎯</div>
-                <div style="text-align:center">✅</div>
-              </div>`;
-          data.forEach((u, i) => {
-            html += `
-              <div class="lb-row">
-                <div class="rank ${rankCls(i)}">${rankIcon(i)}</div>
-                <div class="lb-name">${escHtml(u.display_name)}</div>
-                <div class="lb-pts">${u.total_points ?? 0}</div>
-                <div class="lb-num">${u.exact ?? '—'}</div>
-                <div class="lb-num">${u.correct ?? '—'}</div>
-              </div>`;
-          });
-          html += '</div>';
-          container.innerHTML = html;
+          cacheSave('wc2026_leaderboard', data);
+          renderLeaderboardData(data);
         })
         .catch(() => {
-          container.innerHTML = '<div class="state-msg">⚠️ Could not load leaderboard.</div>';
+          if (!cachedLB) {
+            container.innerHTML = '<div class="state-msg">⚠️ Could not load leaderboard.</div>';
+          }
         });
     }
-
+    function renderLeaderboardData(data) {
+      const container = document.getElementById('lbList');
+      if (!data.length) {
+        container.innerHTML = '<div class="state-msg">No players yet.</div>';
+        return;
+      }
+      const rankIcon = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      const rankCls = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+      let html = `
+    <div class="lb-card">
+      <div class="lb-row header">
+        <div>#</div><div>Player</div>
+        <div style="text-align:center">Points</div>
+        <div style="text-align:center">Exact</div>
+        <div style="text-align:center">Result</div>
+      </div>`;
+      data.forEach((u, i) => {
+        html += `
+      <div class="lb-row">
+        <div class="rank ${rankCls(i)}">${rankIcon(i)}</div>
+        <div class="lb-name">${escHtml(u.display_name)}</div>
+        <div class="lb-pts">${u.total_points ?? 0}</div>
+        <div class="lb-num">${u.exact ?? '—'}</div>
+        <div class="lb-num">${u.correct ?? '—'}</div>
+      </div>`;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    }
     // ── Toggle prediction panel ────────────────────────────────
     function togglePanel(row) {
       const panel = row.nextElementSibling;
@@ -921,7 +1003,6 @@
       try {
         const data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
         showToast(`✅ Synced ${data.count} match${data.count !== 1 ? 'es' : ''}`);
-
         const [mu, mm] = await Promise.all([
           fetch(API + '/users').then(r => r.json()),
           fetch(API + '/matches').then(r => r.json()),
@@ -929,6 +1010,8 @@
         users = mu; matches = mm;
         cacheSave('wc2026_users', mu);
         cacheSave('wc2026_matches', mm);
+        // Clear leaderboard cache so it refreshes
+        localStorage.removeItem('wc2026_leaderboard'); // ← Add this
         renderMatches();
         if (document.getElementById('leaderboard').classList.contains('active'))
           renderLeaderboard();
