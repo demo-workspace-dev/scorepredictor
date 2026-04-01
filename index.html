@@ -752,9 +752,9 @@
         }
 
       } catch (e) {
+        console.error('Boot error:', e);  // ADD THIS
         if (!hasValidCache) {
-          document.getElementById('matchList').innerHTML =
-            '<div class="state-msg">⚠️ Could not load data.</div>';
+          document.getElementById('matchList').innerHTML = `<div class="state-msg">Could not load data.</div>`;
           showToast('Failed to load', true);
         }
       }
