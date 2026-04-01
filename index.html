@@ -779,7 +779,7 @@
 
     // ── Sort users alphabetically ──────────────────────────────
     function sortUsersAlphabetically() {
-      users.sort((a, b) => a.displayname.localeCompare(b.displayname)); // line ~782
+      users.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
     }
 
     // ── Parse kickoff as UTC ───────────────────────────────────
