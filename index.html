@@ -583,7 +583,7 @@
   let matches = [], users = [];
   let toastTimer;
 
-  const CACHE_TTL = 30 * 1000;
+  const CACHE_TTL = 3 * 60 * 1000;
   function cachePaint(key) {
     try {
       const raw = localStorage.getItem(key);
@@ -640,9 +640,10 @@
         fetch(API + '/users').then(r => r.json()),
         fetch(API + '/matches').then(r => r.json()),
       ]);
+      mu.sort((a, b) => (a.display_name||''). localeCompare(b.display_name||''));
       cacheSave('wc2026_users', mu); cacheSave('wc2026_matches', mm);
       if (JSON.stringify(mu) !== JSON.stringify(users) || JSON.stringify(mm) !== JSON.stringify(matches)) {
-        users = mu; matches = mm; sortUsers(); renderMatches();
+        users = mu; matches = mm; renderMatches();
       }
     } catch {
       if (!hasCache) {
