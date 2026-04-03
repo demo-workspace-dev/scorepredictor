@@ -521,7 +521,6 @@
       .match-row { grid-template-columns: 1fr 106px 1fr 44px; }
       .centre-block { min-width: 0; padding: 10px 6px; }
       .score-display { font-size: 1.6rem; }
-      .sync-btn .btn-label { display: none; }
       .lb-header-row, .lb-row { grid-template-columns: 44px 1fr 64px 44px 48px; padding: 12px 14px; }
       .lb-pts { font-size: 1.2rem; }
       .lb-name { font-size: 0.9rem; }
@@ -540,6 +539,81 @@
     #matchList .match-card:nth-child(5) { animation-delay: 0.2s; }
     #matchList .match-card:nth-child(6) { animation-delay: 0.25s; }
     .lb-wrap { animation: slideUp 0.35s ease both; }
+
+    .rules-box {
+      margin-top: 12px;
+      background: #fff;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      padding: 20px 24px 22px;
+    }
+    .rules-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin-bottom: 12px;
+    }
+    .rules-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 4px;
+    }
+    .rules-table thead th {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink4);
+      padding: 0 0 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--rule);
+    }
+    .rules-table thead th.pts-col { text-align: center; width: 64px; }
+    .rules-table tbody td {
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: var(--ink2);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .rules-table tbody tr:last-child td { border-bottom: none; }
+    .pts-col { text-align: center; width: 64px; }
+    .green-pts { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: var(--green); font-size: 1rem; }
+    .blue-pts  { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: var(--blue);  font-size: 1rem; }
+    .grey-pts  { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: var(--ink4);  font-size: 1rem; }
+    .rules-divider { height: 1px; background: var(--rule); margin: 14px 0; }
+    .rules-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin-bottom: 8px;
+    }
+    .rules-list {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .rules-list li {
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.88rem;
+      color: var(--ink2);
+    }
+    .rules-list-item {
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.88rem;
+      color: var(--ink2);
+      line-height: 1.5;
+    }
+    .rules-list-item strong { font-weight: 600; color: var(--ink); }
   </style>
 </head>
 <body>
@@ -769,10 +843,30 @@
 
   function renderLBData(data) {
     if (!data.length) { document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>'; return; }
-    data.sort((a, b) => b.total_points !== a.total_points ? b.total_points - a.total_points : a.display_name.localeCompare(b.display_name));
+
+    // Sort: points → exact scores → correct results → alphabetical
+    data.sort((a, b) => {
+      if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+      if ((b.exact??0) !== (a.exact??0)) return (b.exact??0) - (a.exact??0);
+      if ((b.correct??0) !== (a.correct??0)) return (b.correct??0) - (a.correct??0);
+      return a.display_name.localeCompare(b.display_name);
+    });
+
+    // Compute display ranks — only share rank if truly equal on all tiebreakers incl. name
+    const rankOf = [];
+    data.forEach((u, i) => {
+      if (i === 0) { rankOf.push(0); return; }
+      const p = data[i - 1];
+      const tied = u.total_points === p.total_points &&
+                   (u.exact??0) === (p.exact??0) &&
+                   (u.correct??0) === (p.correct??0) &&
+                   u.display_name === p.display_name;
+      rankOf.push(tied ? rankOf[i - 1] : i);
+    });
+
     const medals = ['🥇','🥈','🥉'];
-    const rcls = i => i===0?'r1':i===1?'r2':i===2?'r3':'rn';
-    const rowcls = i => i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const rcls = r => r===0?'r1':r===1?'r2':r===2?'r3':'rn';
+    const rowcls = r => r===0?'top1':r===1?'top2':r===2?'top3':'';
     let html = `
       <div class="lb-wrap">
         <div class="lb-title-row">
@@ -784,16 +878,39 @@
           <div>Pts</div><div>Exact</div><div>Result</div>
         </div>`;
     data.forEach((u, i) => {
+      const r = rankOf[i];
       html += `
-        <div class="lb-row ${rowcls(i)}">
-          <div class="rank-cell"><span class="rank-num ${rcls(i)}">${i < 3 ? medals[i] : i+1}</span></div>
+        <div class="lb-row ${rowcls(r)}">
+          <div class="rank-cell"><span class="rank-num ${rcls(r)}">${r < 3 ? medals[r] : r+1}</span></div>
           <div class="lb-name-cell"><div class="lb-name">${escHtml(u.display_name)}</div></div>
           <div class="lb-pts">${u.total_points??0}</div>
           <div class="lb-num">${u.exact??'—'}</div>
           <div class="lb-num">${u.correct??'—'}</div>
         </div>`;
     });
-    html += '</div>';
+    html += `</div>
+      <div class="rules-box">
+        <div class="rules-title">How It Works</div>
+        <table class="rules-table">
+          <thead>
+            <tr><th>Event</th><th>Points</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>⚽ Exact score</td><td class="pts-col green-pts">+3</td></tr>
+            <tr><td>✅ Correct result (win/draw/loss)</td><td class="pts-col blue-pts">+1</td></tr>
+            <tr><td>❌ Wrong prediction</td><td class="pts-col grey-pts">+0</td></tr>
+          </tbody>
+        </table>
+        <div class="rules-divider"></div>
+        <div class="rules-sub">Tiebreakers (in order)</div>
+        <ol class="rules-list">
+          <li>More exact scores (3-pt calls)</li>
+          <li>More correct results (1-pt calls)</li>
+          <li>Alphabetical order of name</li>
+        </ol>
+        <div class="rules-divider"></div>
+        <div class="rules-list-item">🔒 Predictions lock <strong>60 minutes</strong> after kickoff — submit early!</div>
+      </div>`;
     document.getElementById('lbList').innerHTML = html;
   }
 
