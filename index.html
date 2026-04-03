@@ -848,7 +848,6 @@
     data.sort((a, b) => {
       if (b.total_points !== a.total_points) return b.total_points - a.total_points;
       if ((b.exact??0) !== (a.exact??0)) return (b.exact??0) - (a.exact??0);
-      if ((b.correct??0) !== (a.correct??0)) return (b.correct??0) - (a.correct??0);
       return a.display_name.localeCompare(b.display_name);
     });
 
@@ -859,7 +858,6 @@
       const p = data[i - 1];
       const tied = u.total_points === p.total_points &&
                    (u.exact??0) === (p.exact??0) &&
-                   (u.correct??0) === (p.correct??0) &&
                    u.display_name === p.display_name;
       rankOf.push(tied ? rankOf[i - 1] : i);
     });
@@ -905,7 +903,6 @@
         <div class="rules-sub">Tiebreakers (in order)</div>
         <ol class="rules-list">
           <li>More exact scores (3-pt calls)</li>
-          <li>More correct results (1-pt calls)</li>
           <li>Alphabetical order of name</li>
         </ol>
         <div class="rules-divider"></div>
