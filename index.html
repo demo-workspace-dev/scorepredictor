@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://sparkling-frost-59a4.satyajeetking.workers.dev" crossorigin />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://sparkling-frost-59a4.satyajeetking.workers.dev" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="icon" href="award.png">
   <title>WC2026 Predictor</title>
   <style>
@@ -26,27 +29,39 @@
       --gold: #b8860b;
       --gold-light: #fdf6e3;
       --blue: #1a3a6b;
-      --rule: rgba(14,14,14,0.12);
-      --rule-strong: rgba(14,14,14,0.25);
+      --rule: rgba(14, 14, 14, 0.12);
+      --rule-strong: rgba(14, 14, 14, 0.25);
       --radius: 4px;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility
+    }
 
     body {
       background: var(--paper);
       color: var(--ink);
-      font-family: 'Barlow', sans-serif;
+      font-family: Barlow, sans-serif;
       font-weight: 400;
-      min-height: 100vh;
+      min-height: 100vh
     }
 
     header {
       background: var(--ink);
       position: sticky;
       top: 0;
-      z-index: 200;
+      z-index: 200
     }
 
     .header-top {
@@ -55,39 +70,46 @@
       justify-content: space-between;
       padding: 0 28px;
       height: 60px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08)
     }
 
-    .logo { display: flex; align-items: baseline; gap: 10px; }
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 10px
+    }
 
     .logo-main {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 900;
       font-size: 1.45rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: #fff;
-      line-height: 1;
+      line-height: 1
     }
-    .logo-main span { color: #5ddb7c; }
+
+    .logo-main span {
+      color: #5ddb7c
+    }
 
     .logo-sub {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 300;
       font-size: 0.78rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      padding-bottom: 2px;
+      color: rgba(255, 255, 255, 0.5);
+      padding-bottom: 2px
     }
 
     .sync-btn {
       background: transparent;
-      color: rgba(255,255,255,0.6);
-      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 7px 16px;
       border-radius: var(--radius);
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 0.8rem;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -96,13 +118,33 @@
       display: flex;
       align-items: center;
       gap: 7px;
-      transition: all 0.2s;
+      transition: all 0.2s
     }
-    .sync-btn:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
-    .sync-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .sync-icon { font-size: 0.85rem; display: inline-block; transition: transform 0.5s; }
-    .sync-btn.spinning .sync-icon { animation: spin 0.7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .sync-btn:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #fff
+    }
+
+    .sync-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed
+    }
+
+    .sync-icon {
+      font-size: 0.85rem;
+      display: inline-block
+    }
+
+    .sync-btn.spinning .sync-icon {
+      animation: spin 0.7s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
 
     .tabs-wrapper {
       background: var(--ink);
@@ -110,77 +152,124 @@
       top: 60px;
       z-index: 199;
       display: flex;
-      padding: 0 28px;
+      padding: 0 28px
     }
 
     .tab {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 700;
       font-size: 0.82rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.35);
+      color: rgba(255, 255, 255, 0.35);
       padding: 13px 20px 11px;
       cursor: pointer;
       border-bottom: 2px solid transparent;
       transition: all 0.2s;
-      user-select: none;
+      user-select: none
     }
-    .tab:hover { color: rgba(255,255,255,0.65); }
-    .tab.active { color: #5ddb7c; border-bottom-color: #5ddb7c; }
+
+    .tab:hover {
+      color: rgba(255, 255, 255, 0.65)
+    }
+
+    .tab.active {
+      color: #5ddb7c;
+      border-bottom-color: #5ddb7c
+    }
 
     main {
       max-width: 780px;
       margin: 0 auto;
-      padding: 36px 24px 100px;
+      padding: 36px 24px 100px
     }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .tab-content {
+      display: none
+    }
+
+    .tab-content.active {
+      display: block
+    }
 
     .stage-header {
       display: flex;
       align-items: center;
       gap: 16px;
-      margin: 40px 0 16px;
+      margin: 40px 0 16px
     }
-    .stage-header:first-child { margin-top: 0; }
+
+    .stage-header:first-child {
+      margin-top: 0
+    }
+
     .stage-label {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 800;
       font-size: 0.75rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--ink3);
-      white-space: nowrap;
+      white-space: nowrap
     }
-    .stage-rule { flex: 1; height: 1px; background: var(--rule); }
+
+    .stage-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--rule)
+    }
 
     .match-card {
       background: #fff;
-      border: 1px solid var(--rule);
+      border: 1.5px solid var(--rule);
       border-radius: var(--radius);
       margin-bottom: 6px;
       overflow: hidden;
-      transition: box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none
     }
-    .match-card:hover { border-color: var(--rule-strong); box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+
+    @media(hover:hover) {
+      .match-card:hover {
+        border-color: #5ddb7c;
+        box-shadow: 0 0 0 3px rgba(93, 219, 124, 0.13), 0 4px 20px rgba(0, 0, 0, 0.06)
+      }
+    }
+
+    .match-card.open {
+      border-color: #5ddb7c;
+      box-shadow: 0 0 0 3px rgba(93, 219, 124, 0.13), 0 4px 20px rgba(0, 0, 0, 0.06)
+    }
 
     .match-row {
       display: grid;
-      grid-template-columns: 1fr 130px 1fr 52px;
+      grid-template-columns: 1fr 130px 1fr;
       align-items: stretch;
-      cursor: pointer;
-      user-select: none;
-      min-height: 72px;
+      min-height: 72px
     }
 
-    .team-cell { display: flex; align-items: center; padding: 16px 20px; min-width: 0; overflow: hidden; }
-    .team-cell.home { justify-content: flex-end; border-right: 1px solid var(--rule); }
-    .team-cell.away { justify-content: flex-start; border-left: 1px solid var(--rule); }
+    .team-cell {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      min-width: 0;
+      overflow: hidden
+    }
+
+    .team-cell.home {
+      justify-content: flex-end;
+      border-right: 1px solid var(--rule)
+    }
+
+    .team-cell.away {
+      justify-content: flex-start;
+      border-left: 1px solid var(--rule)
+    }
 
     .team-name {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 700;
       font-size: 1.15rem;
       letter-spacing: 0.03em;
@@ -190,9 +279,12 @@
       text-overflow: ellipsis;
       max-width: 100%;
       line-height: 1.1;
-      color: var(--ink);
+      color: var(--ink)
     }
-    .team-cell.home .team-name { text-align: right; }
+
+    .team-cell.home .team-name {
+      text-align: right
+    }
 
     .centre-block {
       display: flex;
@@ -201,80 +293,129 @@
       justify-content: center;
       padding: 12px 8px;
       gap: 5px;
-      min-width: 0;
-      overflow: hidden;
       background: var(--paper);
+      transition: background 0.18s
+    }
+
+    .match-card.open .centre-block {
+      background: var(--green-light)
     }
 
     .score-display {
       display: flex;
       align-items: center;
       gap: 2px;
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 900;
       font-size: 2rem;
       letter-spacing: -0.02em;
-      line-height: 1;
+      line-height: 1
     }
-    .score-num { color: var(--ink); min-width: 26px; text-align: center; }
-    .score-num.final { color: var(--green); }
-    .score-num.pending { color: var(--ink3); font-size: 1.4rem; font-weight: 400; }
-    .score-dash { color: var(--ink3); font-weight: 400; font-size: 1.6rem; padding: 0 2px; }
 
-    .match-status { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .score-num {
+      color: var(--ink);
+      min-width: 26px;
+      text-align: center
+    }
+
+    .score-num.final {
+      color: var(--green)
+    }
+
+    .score-num.pending {
+      color: var(--ink3);
+      font-size: 1.4rem;
+      font-weight: 400
+    }
+
+    .score-dash {
+      color: var(--ink3);
+      font-weight: 400;
+      font-size: 1.6rem;
+      padding: 0 2px
+    }
+
+    .match-status {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px
+    }
 
     .badge {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 0.75rem;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 2px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      white-space: nowrap;
+      white-space: nowrap
     }
-    .badge.upcoming { background: var(--paper3); color: var(--ink2); }
-    .badge.finished { background: var(--green-light); color: var(--green); }
-    .badge.live { background: var(--red-light); color: var(--red); animation: blink 1.4s infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .badge.upcoming {
+      background: var(--paper3);
+      color: var(--ink2)
+    }
+
+    .badge.finished {
+      background: var(--green-light);
+      color: var(--green)
+    }
+
+    .badge.live {
+      background: var(--red-light);
+      color: var(--red);
+      animation: blink 1.4s infinite
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.5
+      }
+    }
 
     .match-time {
-      font-family: 'Barlow', sans-serif;
+      font-family: Barlow, sans-serif;
       font-size: 0.78rem;
       font-weight: 500;
       color: var(--ink3);
-      letter-spacing: 0.03em;
+      letter-spacing: 0.03em
     }
-
-    .expand-col { display: flex; align-items: center; padding: 0 14px; border-left: 1px solid var(--rule); }
-    .expand-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--ink3);
-      font-size: 0.85rem;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 2px;
-      transition: all 0.2s;
-    }
-    .expand-btn:hover { background: var(--paper2); color: var(--ink2); }
 
     .predictions-panel {
-      display: none;
-      border-top: 1px solid var(--rule);
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.22s ease;
       background: var(--paper);
-      padding: 16px 20px;
+      overflow: hidden
     }
-    .predictions-panel.open { display: block; }
+
+    .predictions-panel-inner {
+      overflow: hidden;
+      padding: 0 20px;
+      transition: padding 0.22s ease
+    }
+
+    .match-card.open .predictions-panel {
+      grid-template-rows: 1fr;
+      border-top: 1px solid var(--rule)
+    }
+
+    .match-card.open .predictions-panel-inner {
+      padding: 14px 20px
+    }
 
     .pred-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 8px;
+      gap: 8px
     }
 
     .pred-item {
@@ -285,12 +426,15 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s
     }
-    .pred-item:hover { border-color: var(--rule-strong); }
+
+    .pred-item:hover {
+      border-color: var(--rule-strong)
+    }
 
     .pred-name {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 0.78rem;
       font-weight: 700;
       letter-spacing: 0.06em;
@@ -298,10 +442,14 @@
       color: var(--ink2);
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis
     }
 
-    .pred-score-row { display: flex; align-items: center; gap: 6px; }
+    .pred-score-row {
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
 
     .pred-input {
       width: 42px;
@@ -310,41 +458,74 @@
       border: 1px solid var(--rule-strong);
       border-radius: var(--radius);
       color: var(--ink);
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 1.2rem;
       font-weight: 800;
       text-align: center;
       outline: none;
       transition: border-color 0.15s, background 0.15s;
-      -moz-appearance: textfield;
+      -moz-appearance: textfield
     }
-    .pred-input::-webkit-outer-spin-button,
-    .pred-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .pred-input:focus { border-color: var(--green); background: var(--green-light); }
-    .pred-input:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; border-color: transparent; }
 
-    .pred-sep { color: var(--ink3); font-weight: 600; font-size: 0.9rem; }
+    .pred-input::-webkit-outer-spin-button,
+    .pred-input::-webkit-inner-spin-button {
+      -webkit-appearance: none
+    }
+
+    .pred-input:focus {
+      border-color: var(--green);
+      background: var(--green-light)
+    }
+
+    .pred-input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: transparent;
+      border-color: transparent
+    }
+
+    .pred-sep {
+      color: var(--ink3);
+      font-weight: 600;
+      font-size: 0.9rem
+    }
 
     .points-pill {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 0.75rem;
       font-weight: 700;
       padding: 3px 8px;
       border-radius: 2px;
       align-self: flex-start;
       letter-spacing: 0.08em;
-      text-transform: uppercase;
+      text-transform: uppercase
     }
-    .points-pill.p3 { background: var(--green-light); color: var(--green); }
-    .points-pill.p1 { background: #e8eef8; color: var(--blue); }
-    .points-pill.p0 { background: var(--red-light); color: var(--red); }
-    .points-pill.pnd { background: var(--paper2); color: var(--ink4); }
+
+    .points-pill.p3 {
+      background: var(--green-light);
+      color: var(--green)
+    }
+
+    .points-pill.p1 {
+      background: #e8eef8;
+      color: var(--blue)
+    }
+
+    .points-pill.p0 {
+      background: var(--red-light);
+      color: var(--red)
+    }
+
+    .points-pill.pnd {
+      background: var(--paper2);
+      color: var(--ink4)
+    }
 
     .lb-wrap {
       background: #fff;
       border: 1px solid var(--rule);
       border-radius: var(--radius);
-      overflow: hidden;
+      overflow: hidden
     }
 
     .lb-title-row {
@@ -352,22 +533,24 @@
       border-bottom: 2px solid var(--ink);
       display: flex;
       align-items: baseline;
-      gap: 12px;
+      gap: 12px
     }
+
     .lb-title {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 900;
       font-size: 1.5rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: var(--ink);
-      line-height: 1;
+      line-height: 1
     }
+
     .lb-sub {
-      font-family: 'Instrument Serif', serif;
+      font-family: "Instrument Serif", serif;
       font-style: italic;
       font-size: 0.85rem;
-      color: var(--ink4);
+      color: var(--ink4)
     }
 
     .lb-header-row {
@@ -376,14 +559,17 @@
       padding: 8px 24px;
       background: var(--paper2);
       border-bottom: 1px solid var(--rule);
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--ink3);
+      color: var(--ink3)
     }
-    .lb-header-row div:not(:first-child):not(:nth-child(2)) { text-align: center; }
+
+    .lb-header-row div:not(:first-child):not(:nth-child(2)) {
+      text-align: center
+    }
 
     .lb-row {
       display: grid;
@@ -391,28 +577,66 @@
       align-items: center;
       padding: 14px 24px;
       border-bottom: 1px solid var(--rule);
-      transition: background 0.15s;
+      transition: background 0.15s
     }
-    .lb-row:last-child { border-bottom: none; }
-    .lb-row:hover { background: var(--paper); }
-    .lb-row.top1 { background: var(--gold-light); }
-    .lb-row.top1:hover { background: #fdf2d0; }
 
-    .rank-cell { display: flex; align-items: center; justify-content: center; }
+    .lb-row:last-child {
+      border-bottom: none
+    }
+
+    .lb-row:hover {
+      background: var(--paper)
+    }
+
+    .lb-row.top1 {
+      background: var(--gold-light)
+    }
+
+    .lb-row.top1:hover {
+      background: #fdf2d0
+    }
+
+    .rank-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
     .rank-num {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 900;
       font-size: 1.4rem;
-      line-height: 1;
+      line-height: 1
     }
-    .rank-num.r1 { color: var(--gold); font-size: 1.6rem; }
-    .rank-num.r2 { color: var(--ink2); }
-    .rank-num.r3 { color: #a0522d; }
-    .rank-num.rn { color: var(--ink3); font-size: 0.9rem; font-weight: 700; }
 
-    .lb-name-cell { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .rank-num.r1 {
+      color: var(--gold);
+      font-size: 1.6rem
+    }
+
+    .rank-num.r2 {
+      color: var(--ink2)
+    }
+
+    .rank-num.r3 {
+      color: #a0522d
+    }
+
+    .rank-num.rn {
+      color: var(--ink3);
+      font-size: 0.9rem;
+      font-weight: 700
+    }
+
+    .lb-name-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0
+    }
+
     .lb-name {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 700;
       font-size: 1.05rem;
       text-transform: uppercase;
@@ -420,36 +644,47 @@
       color: var(--ink);
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis
     }
-    .lb-row.top1 .lb-name { color: var(--gold); }
+
+    .lb-row.top1 .lb-name {
+      color: var(--gold)
+    }
 
     .lb-pts {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 900;
       font-size: 1.5rem;
       color: var(--green);
       text-align: center;
-      line-height: 1;
+      line-height: 1
     }
+
     .lb-num {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 1rem;
       font-weight: 600;
       text-align: center;
-      color: var(--ink2);
+      color: var(--ink2)
     }
 
     @keyframes shimmer {
-      0% { background-position: -1000px 0; }
-      100% { background-position: 1000px 0; }
+      0% {
+        background-position: -1000px 0
+      }
+
+      100% {
+        background-position: 1000px 0
+      }
     }
+
     .skel {
       background: linear-gradient(90deg, var(--paper2) 25%, var(--paper3) 50%, var(--paper2) 75%);
       background-size: 1000px 100%;
       animation: shimmer 1.8s infinite linear;
-      border-radius: 3px;
+      border-radius: 3px
     }
+
     .skel-card {
       background: #fff;
       border: 1px solid var(--rule);
@@ -460,31 +695,65 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      min-height: 72px;
+      min-height: 72px
     }
-    .sk-team { height: 16px; width: 100px; }
-    .sk-score { height: 40px; width: 100px; border-radius: 3px; }
-    .sk-meta { height: 10px; width: 70px; margin-top: 6px; }
+
+    .sk-team {
+      height: 16px;
+      width: 100px
+    }
+
+    .sk-score {
+      height: 40px;
+      width: 100px;
+      border-radius: 3px
+    }
+
+    .sk-meta {
+      height: 10px;
+      width: 70px;
+      margin-top: 6px
+    }
+
     .sk-lb-row {
       display: grid;
       grid-template-columns: 56px 1fr 80px 56px 60px;
       align-items: center;
       padding: 14px 24px;
       gap: 8px;
-      border-bottom: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule)
     }
-    .sk-rank { height: 22px; width: 28px; margin: 0 auto; }
-    .sk-name { height: 16px; width: 140px; }
-    .sk-pts { height: 22px; width: 44px; margin: 0 auto; }
-    .sk-stat { height: 14px; width: 28px; margin: 0 auto; }
+
+    .sk-rank {
+      height: 22px;
+      width: 28px;
+      margin: 0 auto
+    }
+
+    .sk-name {
+      height: 16px;
+      width: 140px
+    }
+
+    .sk-pts {
+      height: 22px;
+      width: 44px;
+      margin: 0 auto
+    }
+
+    .sk-stat {
+      height: 14px;
+      width: 28px;
+      margin: 0 auto
+    }
 
     .state-msg {
       text-align: center;
       color: var(--ink3);
       padding: 60px 20px;
-      font-family: 'Instrument Serif', serif;
+      font-family: "Instrument Serif", serif;
       font-style: italic;
-      font-size: 1rem;
+      font-size: 1rem
     }
 
     .toast {
@@ -497,72 +766,52 @@
       border-left: 3px solid #5ddb7c;
       padding: 10px 20px;
       border-radius: var(--radius);
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 0.85rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       opacity: 0;
-      transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
       z-index: 999;
-      white-space: nowrap;
-    }
-    .toast.error { border-left-color: var(--red); }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    @media (max-width: 560px) {
-      .header-top { padding: 0 16px; height: 54px; }
-      .logo-main { font-size: 1.2rem; }
-      .tabs-wrapper { padding: 0 16px; top: 54px; }
-      .tab { padding: 11px 14px 9px; font-size: 0.78rem; }
-      main { padding: 24px 14px 100px; }
-      .team-name { font-size: 0.9rem; max-width: 100%; }
-      .team-cell { padding: 12px 12px; }
-      .match-row { grid-template-columns: 1fr 106px 1fr 44px; }
-      .centre-block { min-width: 0; padding: 10px 6px; }
-      .score-display { font-size: 1.6rem; }
-      .lb-header-row, .lb-row { grid-template-columns: 44px 1fr 64px 44px 48px; padding: 12px 14px; }
-      .lb-pts { font-size: 1.2rem; }
-      .lb-name { font-size: 0.9rem; }
-      .sk-lb-row { grid-template-columns: 44px 1fr 64px 44px 48px; padding: 12px 14px; }
-      .pred-grid { grid-template-columns: 1fr 1fr; }
+      white-space: nowrap
     }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
+    .toast.error {
+      border-left-color: var(--red)
     }
-    #matchList .match-card { animation: slideUp 0.38s ease both; }
-    #matchList .match-card:nth-child(2) { animation-delay: 0.05s; }
-    #matchList .match-card:nth-child(3) { animation-delay: 0.1s; }
-    #matchList .match-card:nth-child(4) { animation-delay: 0.15s; }
-    #matchList .match-card:nth-child(5) { animation-delay: 0.2s; }
-    #matchList .match-card:nth-child(6) { animation-delay: 0.25s; }
-    .lb-wrap { animation: slideUp 0.35s ease both; }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
 
     .rules-box {
       margin-top: 12px;
       background: #fff;
       border: 1px solid var(--rule);
       border-radius: var(--radius);
-      padding: 20px 24px 22px;
+      padding: 20px 24px 22px
     }
+
     .rules-title {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 800;
       font-size: 0.75rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--ink3);
-      margin-bottom: 12px;
+      margin-bottom: 12px
     }
+
     .rules-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 4px;
+      margin-bottom: 4px
     }
+
     .rules-table thead th {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.1em;
@@ -570,424 +819,747 @@
       color: var(--ink4);
       padding: 0 0 6px;
       text-align: left;
-      border-bottom: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule)
     }
-    .rules-table thead th.pts-col { text-align: center; width: 64px; }
+
+    .rules-table thead th.pts-col {
+      text-align: center;
+      width: 64px
+    }
+
     .rules-table tbody td {
-      font-family: 'Barlow', sans-serif;
+      font-family: Barlow, sans-serif;
       font-size: 0.88rem;
       font-weight: 400;
       color: var(--ink2);
       padding: 8px 0;
-      border-bottom: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule)
     }
-    .rules-table tbody tr:last-child td { border-bottom: none; }
-    .pts-col { text-align: center; width: 64px; }
-    .green-pts { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: var(--green); font-size: 1rem; }
-    .blue-pts  { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: var(--blue);  font-size: 1rem; }
-    .grey-pts  { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: var(--ink4);  font-size: 1rem; }
-    .rules-divider { height: 1px; background: var(--rule); margin: 14px 0; }
+
+    .rules-table tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    .pts-col {
+      text-align: center;
+      width: 64px
+    }
+
+    .green-pts {
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 800;
+      color: var(--green);
+      font-size: 1rem
+    }
+
+    .blue-pts {
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 800;
+      color: var(--blue);
+      font-size: 1rem
+    }
+
+    .grey-pts {
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 800;
+      color: var(--ink4);
+      font-size: 1rem
+    }
+
+    .rules-divider {
+      height: 1px;
+      background: var(--rule);
+      margin: 14px 0
+    }
+
     .rules-sub {
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: "Barlow Condensed", sans-serif;
       font-weight: 700;
       font-size: 0.75rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--ink3);
-      margin-bottom: 8px;
+      margin-bottom: 8px
     }
+
     .rules-list {
       padding-left: 18px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 5px
     }
+
     .rules-list li {
-      font-family: 'Barlow', sans-serif;
+      font-family: Barlow, sans-serif;
       font-size: 0.88rem;
-      color: var(--ink2);
+      color: var(--ink2)
     }
+
     .rules-list-item {
-      font-family: 'Barlow', sans-serif;
+      font-family: Barlow, sans-serif;
       font-size: 0.88rem;
       color: var(--ink2);
-      line-height: 1.5;
+      line-height: 1.5
     }
-    .rules-list-item strong { font-weight: 600; color: var(--ink); }
+
+    .rules-list-item strong {
+      font-weight: 600;
+      color: var(--ink)
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .match-card.new-card {
+      animation: slideUp 0.38s ease both
+    }
+
+    .lb-wrap {
+      animation: slideUp 0.35s ease both
+    }
+
+    @media(max-width:560px) {
+      .header-top {
+        padding: 0 16px;
+        height: 54px
+      }
+
+      .logo-main {
+        font-size: 1.2rem
+      }
+
+      .tabs-wrapper {
+        padding: 0 16px;
+        top: 54px
+      }
+
+      .tab {
+        padding: 11px 14px 9px;
+        font-size: 0.78rem
+      }
+
+      main {
+        padding: 24px 14px 100px
+      }
+
+      .team-name {
+        font-size: 0.9rem;
+        max-width: 100%
+      }
+
+      .team-cell {
+        padding: 12px 12px
+      }
+
+      .match-row {
+        grid-template-columns: 1fr 106px 1fr
+      }
+
+      .centre-block {
+        min-width: 0;
+        padding: 10px 6px
+      }
+
+      .score-display {
+        font-size: 1.6rem
+      }
+
+      .lb-header-row,
+      .lb-row {
+        grid-template-columns: 44px 1fr 64px 44px 48px;
+        padding: 12px 14px
+      }
+
+      .lb-pts {
+        font-size: 1.2rem
+      }
+
+      .lb-name {
+        font-size: 0.9rem
+      }
+
+      .sk-lb-row {
+        grid-template-columns: 44px 1fr 64px 44px 48px;
+        padding: 12px 14px
+      }
+
+      .pred-grid {
+        grid-template-columns: 1fr 1fr
+      }
+    }
   </style>
 </head>
+
 <body>
-
-<header>
-  <div class="header-top">
-    <div class="logo">
-      <div class="logo-main">WC<span>2026</span></div>
-      <div class="logo-sub">Predictor</div>
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-main">WC<span>2026</span></div>
+        <div class="logo-sub">Predictor</div>
+      </div>
+      <button class="sync-btn" id="syncBtn" onclick="syncAll()">
+        <span class="sync-icon">&#x21BB;</span>
+        <span class="btn-label">Sync Scores</span>
+      </button>
     </div>
-    <button class="sync-btn" id="syncBtn" onclick="syncAll()">
-      <span class="sync-icon">↻</span>
-      <span class="btn-label">Sync Scores</span>
-    </button>
-  </div>
-</header>
+    <div class="tabs-wrapper">
+      <div class="tab active" onclick="switchTab('predict',this)">Predict</div>
+      <div class="tab" onclick="switchTab('leaderboard',this)">Leaderboard</div>
+    </div>
+  </header>
+  <main>
+    <div id="predict" class="tab-content active">
+      <div id="matchList">
+        <div class="state-msg">Loading matches…</div>
+      </div>
+    </div>
+    <div id="leaderboard" class="tab-content">
+      <div id="lbList">
+        <div class="state-msg">Loading leaderboard…</div>
+      </div>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
 
-<div class="tabs-wrapper">
-  <div class="tab active" onclick="switchTab('predict', this)">Predict</div>
-  <div class="tab" onclick="switchTab('leaderboard', this)">Leaderboard</div>
-</div>
+  <script>
+    const API = 'https://sparkling-frost-59a4.satyajeetking.workers.dev';
+    const STAGE_LABEL = { group: 'Group Stage', r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter Finals', sf: 'Semi Finals', third: 'Third Place', final: 'Final' };
+    const predBuffer = {};
+    const timers = {};
+    let matches = [], users = [];
+    let toastTimer;
+    const CACHE_TTL = 3 * 60 * 1000;
 
-<main>
-  <div id="predict" class="tab-content active">
-    <div id="matchList"><div class="state-msg">Loading matches…</div></div>
-  </div>
-  <div id="leaderboard" class="tab-content">
-    <div id="lbList"><div class="state-msg">Loading leaderboard…</div></div>
-  </div>
-</main>
-
-<div class="toast" id="toast"></div>
-
-<script>
-  const API = 'https://sparkling-frost-59a4.satyajeetking.workers.dev';
-  const STAGE_LABEL = {
-    group:'Group Stage', r32:'Round of 32', r16:'Round of 16',
-    qf:'Quarter Finals', sf:'Semi Finals', third:'Third Place', final:'Final',
-  };
-  const predBuffer = {};
-  let matches = [], users = [];
-  let toastTimer;
-
-  const CACHE_TTL = 3 * 60 * 1000;
-  function cachePaint(key) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) return null;
-      const p = JSON.parse(raw);
-      if (p?.data && p?.ts && Date.now() - p.ts < CACHE_TTL) return p.data;
-      return null;
-    } catch { return null; }
-  }
-  function cacheSave(key, data) {
-    try { localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() })); } catch {}
-  }
-
-  function renderSkeleton() {
-    const cards = Array.from({ length: 5 }, () => `
-      <div class="skel-card">
-        <div class="skel sk-team"></div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-          <div class="skel sk-score"></div>
-          <div class="skel sk-meta"></div>
-        </div>
-        <div class="skel sk-team"></div>
-      </div>`).join('');
-    document.getElementById('matchList').innerHTML =
-      '<div class="stage-header"><div class="stage-rule"></div></div>' + cards;
-  }
-
-  function renderLBSkeleton() {
-    const rows = Array.from({ length: 7 }, () => `
-      <div class="sk-lb-row">
-        <div class="skel sk-rank"></div>
-        <div class="skel sk-name"></div>
-        <div class="skel sk-pts"></div>
-        <div class="skel sk-stat"></div>
-        <div class="skel sk-stat"></div>
-      </div>`).join('');
-    document.getElementById('lbList').innerHTML = `
-      <div class="lb-wrap">
-        <div class="lb-title-row"><div class="lb-title">Standings</div></div>
-        <div class="lb-header-row">
-          <div></div><div>Player</div>
-          <div>Pts</div><div>Exact</div><div>Result</div>
-        </div>${rows}
-      </div>`;
-  }
-
-  async function boot() {
-    const pu = cachePaint('wc2026_users'), pm = cachePaint('wc2026_matches');
-    const hasCache = Array.isArray(pu) && pu.length && Array.isArray(pm) && pm.length;
-    if (hasCache) { users = pu; matches = pm; sortUsers(); renderMatches(); }
-    else renderSkeleton();
-    try {
-      const [mu, mm] = await Promise.all([
-        fetch(API + '/users').then(r => r.json()),
-        fetch(API + '/matches').then(r => r.json()),
-      ]);
-      mu.sort((a, b) => (a.display_name||''). localeCompare(b.display_name||''));
-      cacheSave('wc2026_users', mu); cacheSave('wc2026_matches', mm);
-      if (JSON.stringify(mu) !== JSON.stringify(users) || JSON.stringify(mm) !== JSON.stringify(matches)) {
-        users = mu; matches = mm; renderMatches();
-      }
-    } catch {
-      if (!hasCache) {
-        document.getElementById('matchList').innerHTML = `<div class="state-msg">Could not load data.</div>`;
-        showToast('Failed to load', true);
-      }
+    // ── CACHE ──────────────────────────────────────────────────────────────────
+    function cachePaint(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const p = JSON.parse(raw);
+        if (p && p.data && (Date.now() - p.ts) < CACHE_TTL) return p.data;
+        localStorage.removeItem(key);
+        return null;
+      } catch { localStorage.removeItem(key); return null; }
     }
-  }
 
-  let lastVisible = Date.now();
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { lastVisible = Date.now(); }
-    else if (Date.now() - lastVisible > 5 * 60 * 1000) {
-      ['wc2026_users','wc2026_matches','wc2026_leaderboard'].forEach(k => localStorage.removeItem(k));
-      boot();
+    function cacheSave(key, data) {
+      try {
+        localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
+      } catch { try { localStorage.removeItem(key); } catch { } }
     }
-  });
 
-  function sortUsers() {
-    users.sort((a, b) => (a.display_name||'').localeCompare(b.display_name||''));
-  }
-
-  function parseUTC(str) {
-    if (!str) return null;
-    if (!str.endsWith('Z') && !str.includes('+') && !str.match(/[+-]\d{2}:\d{2}$/)) str += 'Z';
-    return new Date(str);
-  }
-  const fmtDate = dt => dt.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', timeZone:'Asia/Kolkata' });
-  const fmtTime = dt => dt.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Kolkata' }).toUpperCase() + ' IST';
-
-  function switchTab(id, el) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    el.classList.add('active');
-    if (id === 'leaderboard') renderLeaderboard();
-  }
-
-  function renderMatches() {
-    const container = document.getElementById('matchList');
-    if (!matches.length) { container.innerHTML = '<div class="state-msg">No matches yet.</div>'; return; }
-    let html = '', lastStage = null;
-    matches.forEach(m => {
-      if (m.stage !== lastStage) {
-        html += `<div class="stage-header"><div class="stage-label">${STAGE_LABEL[m.stage]||m.stage}</div><div class="stage-rule"></div></div>`;
-        lastStage = m.stage;
+    // ── BOOT ───────────────────────────────────────────────────────────────────
+    // KEY FIX: fetch errors and render errors are in SEPARATE try-catches.
+    // A render bug will NEVER show "connection error" to the user.
+    async function boot() {
+      const pu = cachePaint('wc2026users');
+      const pm = cachePaint('wc2026matches');
+      // Wipe cache written by older code versions (no team data = stale)
+      if (pm && pm[0] && !pm[0].team) {
+        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(function (k) { localStorage.removeItem(k); });
       }
-      const finished = m.status === 'FINISHED';
-      const kickoffDt = parseUTC(m.kickoff);
-      const lockTime = kickoffDt ? new Date(kickoffDt.getTime() + 3600000) : null;
-      const locked = finished || (lockTime && new Date() >= lockTime);
-      const homeTeam = m.team_home || 'TBD', awayTeam = m.team_away || 'TBD';
-      const sh = finished ? `<span class="score-num final">${m.score_home}</span>` : `<span class="score-num pending">–</span>`;
-      const sa = finished ? `<span class="score-num final">${m.score_away}</span>` : `<span class="score-num pending">–</span>`;
-      const badgeCls = finished ? 'finished' : 'upcoming';
-      const badgeTxt = finished ? 'Full Time' : (kickoffDt ? fmtDate(kickoffDt) : '—');
-      const timeStr = kickoffDt ? fmtTime(kickoffDt) : '';
+      const hasValidCache = Array.isArray(pu) && pu.length > 0
+        && Array.isArray(pm) && pm.length > 0
+        && pm[0] && pm[0].match_id !== undefined
+        && pm[0].team_home !== undefined
+        && pu[0] && pu[0].user_id !== undefined;
 
-      let predsHtml = '';
+      if (hasValidCache) {
+        users = pu; matches = pm; sortUsers();
+        buildMatchDOM();
+      } else {
+        renderSkeleton();
+      }
+
+      // ── STEP 1: Fetch — own try-catch, only this shows connection errors ──
+      let mu, mm;
+      try {
+        const [ru, rm] = await Promise.all([
+          fetch(API + '/users').then(r => { if (!r.ok) throw new Error('users ' + r.status); return r.json(); }),
+          fetch(API + '/matches').then(r => { if (!r.ok) throw new Error('matches ' + r.status); return r.json(); })
+        ]);
+        mu = ru; mm = rm;
+      } catch (err) {
+        console.error('[WC2026] fetch failed:', err);
+        if (!hasValidCache) {
+          document.getElementById('matchList').innerHTML =
+            '<div class="state-msg">Could not load data. Check your connection.</div>';
+        }
+        showToast('Failed to load data', true);
+        return; // stop — do not attempt to render
+      }
+
+      // ── STEP 2: Validate shape ──────────────────────────────────────────────
+      // Debug: log actual API shape so we can verify field names
+      if (!Array.isArray(mu) || !Array.isArray(mm)) {
+        console.error('[WC2026] unexpected API response shape:', mu, mm);
+        if (!hasValidCache) {
+          document.getElementById('matchList').innerHTML =
+            '<div class="state-msg">Unexpected response from server.</div>';
+        }
+        return;
+      }
+
+      mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
+      cacheSave('wc2026users', mu);
+      cacheSave('wc2026matches', mm);
+
+      // ── STEP 3: Render — own try-catch, render bugs never show conn error ──
+      try {
+        if (hasValidCache) {
+          patchMatchDOM(mm, mu);
+        } else {
+          users = mu; matches = mm; sortUsers();
+          buildMatchDOM();
+        }
+      } catch (err) {
+        console.error('[WC2026] render error:', err);
+        // Fallback: force a full clean rebuild
+        try {
+          users = mu; matches = mm; sortUsers();
+          buildMatchDOM();
+        } catch (e2) {
+          console.error('[WC2026] fallback render also failed:', e2);
+        }
+      }
+
+      users = mu; matches = mm; sortUsers();
+    }
+
+    // ── TAB VISIBILITY — silent background patch only, never shows skeleton ───
+    let lastVisible = Date.now();
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { lastVisible = Date.now(); return; }
+      const away = Date.now() - lastVisible;
+      if (away > 10 * 60 * 1000 && !cachePaint('wc2026matches')) {
+        Promise.all([
+          fetch(API + '/users').then(r => r.json()).catch(() => null),
+          fetch(API + '/matches').then(r => r.json()).catch(() => null)
+        ]).then(function (results) {
+          const mu = results[0], mm = results[1];
+          if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
+          mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
+          cacheSave('wc2026users', mu);
+          cacheSave('wc2026matches', mm);
+          try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] patch error on visibility:', e); }
+          users = mu; matches = mm; sortUsers();
+        });
+      }
+    });
+
+    // ── SKELETON ───────────────────────────────────────────────────────────────
+    function renderSkeleton() {
+      var cards = Array.from({ length: 5 }, function () {
+        return '<div class="skel-card">' +
+          '<div class="skel sk-team"></div>' +
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:6px">' +
+          '<div class="skel sk-score"></div><div class="skel sk-meta"></div>' +
+          '</div>' +
+          '<div class="skel sk-team"></div>' +
+          '</div>';
+      }).join('');
+      document.getElementById('matchList').innerHTML =
+        '<div class="stage-header"><div class="skel" style="height:12px;width:80px"></div>' +
+        '<div class="stage-rule"></div></div>' + cards;
+    }
+
+    // ── UTILS ──────────────────────────────────────────────────────────────────
+    function sortUsers() { users.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); }); }
+
+    function parseUTC(str) {
+      if (!str) return null;
+      var s = str;
+      if (s.charAt(s.length - 1) !== 'Z' && s.indexOf('+') === -1 && !/\d\d:\d\d:\d\d-\d\d/.test(s)) s += 'Z';
+      var d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function fmtDate(dt) {
+      return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+    }
+    function fmtTime(dt) {
+      return dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).toUpperCase() + ' IST';
+    }
+    function escHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function getMatchMeta(m) {
+      var finished = m.status === 'FINISHED';
+      var kickoffDt = parseUTC(m.kickoff);
+      var lockTime = kickoffDt ? new Date(kickoffDt.getTime() - 3600000) : null;
+      var locked = finished || (lockTime && new Date() > lockTime);
+      return {
+        finished: finished,
+        kickoffDt: kickoffDt,
+        locked: locked,
+        badgeCls: finished ? 'finished' : 'upcoming',
+        badgeTxt: finished ? 'Full Time' : (kickoffDt ? fmtDate(kickoffDt) : ''),
+        timeStr: kickoffDt ? fmtTime(kickoffDt) : ''
+      };
+    }
+
+    // ── BUILD PRED ITEM HTML ───────────────────────────────────────────────────
+    function buildPredItemHTML(u, matchid, pred, finished, locked) {
+      var ph = (pred != null && pred.pred_home !== undefined) ? pred.pred_home : '';
+      var pa = (pred != null && pred.pred_away !== undefined) ? pred.pred_away : '';
+      var pts = pred ? pred.points : null;
+      var pillCls = 'pnd', pillTxt = 'Pending';
+      if (finished) {
+        if (!pred) { pillCls = 'p0'; pillTxt = 'No pick'; }
+        else if (pts === 3) { pillCls = 'p3'; pillTxt = '3 Exact'; }
+        else if (pts === 1) { pillCls = 'p1'; pillTxt = '1 Result'; }
+        else { pillCls = 'p0'; pillTxt = '0 Miss'; }
+      }
+      var dis = locked ? 'disabled' : '';
+      var uid = escHtml(u.user_id);
+      var mid = escHtml(matchid);
+      // data-matchid/userid/side on each input — no inline quote escaping needed
+      return '<div class="pred-item" data-userid="' + uid + '">' +
+        '<div class="pred-name">' + escHtml(u.display_name) + '</div>' +
+        '<div class="pred-score-row">' +
+        '<input class="pred-input" type="number" min="0" max="20" placeholder="-" value="' + ph + '" ' + dis +
+        ' data-matchid="' + mid + '" data-userid="' + uid + '" data-side="home"' +
+        ' onclick="event.stopPropagation()" onblur="savePred(this)" data-role="input-home">' +
+        '<span class="pred-sep">:</span>' +
+        '<input class="pred-input" type="number" min="0" max="20" placeholder="-" value="' + pa + '" ' + dis +
+        ' data-matchid="' + mid + '" data-userid="' + uid + '" data-side="away"' +
+        ' onclick="event.stopPropagation()" onblur="savePred(this)" data-role="input-away">' +
+        '</div>' +
+        '<div class="points-pill ' + pillCls + '" data-role="pill">' + pillTxt + '</div>' +
+        '</div>';
+    }
+
+    // ── BUILD FULL CARD HTML ───────────────────────────────────────────────────
+    function buildCardHTML(m) {
+      var meta = getMatchMeta(m);
+      // API uses snake_case: m.team_home / m.team_away
+      var homeTeam = m.team_home || 'TBD';
+      var awayTeam = m.team_away || 'TBD';
+      var sh = meta.finished
+        ? '<span class="score-num final" data-role="sh">' + ((m.score_home !== undefined && m.score_home !== null ? m.score_home : '')) + '</span>'
+        : '<span class="score-num pending" data-role="sh">–</span>';
+      var sa = meta.finished
+        ? '<span class="score-num final" data-role="sa">' + ((m.score_away !== undefined && m.score_away !== null ? m.score_away : '')) + '</span>'
+        : '<span class="score-num pending" data-role="sa">–</span>';
+
+      var predsHtml = '';
       if (users.length) {
         predsHtml = '<div class="pred-grid">';
-        users.forEach(u => {
-          const pred = (m.predictions||{})[u.user_id];
-          const ph = pred != null ? pred.pred_home : '';
-          const pa = pred != null ? pred.pred_away : '';
-          const pts = pred ? pred.points : null;
-          let pill = '<div class="points-pill pnd">Pending</div>';
-          if (finished) {
-            if (!pred) pill = '<div class="points-pill p0">No pick</div>';
-            else if (pts===3) pill = '<div class="points-pill p3">+3 Exact</div>';
-            else if (pts===1) pill = '<div class="points-pill p1">+1 Result</div>';
-            else pill = '<div class="points-pill p0">+0 Miss</div>';
-          }
-          const dis = locked ? 'disabled' : '';
-          predsHtml += `
-            <div class="pred-item">
-              <div class="pred-name">${escHtml(u.display_name)}</div>
-              <div class="pred-score-row">
-                <input class="pred-input" type="number" min="0" max="20" placeholder="–" value="${ph}" ${dis}
-                  onblur="savePred(this,'${m.match_id}','${u.user_id}','home')" />
-                <span class="pred-sep">–</span>
-                <input class="pred-input" type="number" min="0" max="20" placeholder="–" value="${pa}" ${dis}
-                  onblur="savePred(this,'${m.match_id}','${u.user_id}','away')" />
-              </div>
-              ${pill}
-            </div>`;
+        users.forEach(function (u) {
+          var pred = m.predictions ? m.predictions[u.user_id] : null;
+          predsHtml += buildPredItemHTML(u, m.match_id, pred, meta.finished, meta.locked);
         });
         predsHtml += '</div>';
       } else {
-        predsHtml = '<div style="color:var(--ink4);font-family:\'Instrument Serif\',serif;font-style:italic;font-size:0.9rem;">No players added yet.</div>';
+        predsHtml = '<div style="color:var(--ink4);font-family:Instrument Serif,serif;font-style:italic;font-size:0.9rem">No players added yet.</div>';
       }
 
-      html += `
-        <div class="match-card">
-          <div class="match-row" onclick="togglePanel(this)">
-            <div class="team-cell home"><div class="team-name">${escHtml(homeTeam)}</div></div>
-            <div class="centre-block">
-              <div class="score-display">${sh}<span class="score-dash">·</span>${sa}</div>
-              <div class="match-status">
-                <div class="badge ${badgeCls}">${badgeTxt}</div>
-                <div class="match-time">${timeStr}</div>
-              </div>
-            </div>
-            <div class="team-cell away"><div class="team-name">${escHtml(awayTeam)}</div></div>
-            <div class="expand-col">
-              <button class="expand-btn" aria-label="Show predictions">▾</button>
-            </div>
-          </div>
-          <div class="predictions-panel">${predsHtml}</div>
-        </div>`;
-    });
-    container.innerHTML = html;
-  }
-
-  function renderLeaderboard() {
-    const container = document.getElementById('lbList');
-    const cached = cachePaint('wc2026_leaderboard');
-    if (cached?.length) renderLBData(cached); else renderLBSkeleton();
-    fetch(API + '/leaderboard').then(r => r.json()).then(data => {
-      cacheSave('wc2026_leaderboard', data); renderLBData(data);
-    }).catch(() => { if (!cached) container.innerHTML = '<div class="state-msg">Could not load leaderboard.</div>'; });
-  }
-
-  function renderLBData(data) {
-    if (!data.length) { document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>'; return; }
-
-    // Sort: points → exact scores → correct results → alphabetical
-    data.sort((a, b) => {
-      if (b.total_points !== a.total_points) return b.total_points - a.total_points;
-      if ((b.exact??0) !== (a.exact??0)) return (b.exact??0) - (a.exact??0);
-      return a.display_name.localeCompare(b.display_name);
-    });
-
-    // Compute display ranks — only share rank if truly equal on all tiebreakers incl. name
-    const rankOf = [];
-    data.forEach((u, i) => {
-      if (i === 0) { rankOf.push(0); return; }
-      const p = data[i - 1];
-      const tied = u.total_points === p.total_points &&
-                   (u.exact??0) === (p.exact??0) &&
-                   u.display_name === p.display_name;
-      rankOf.push(tied ? rankOf[i - 1] : i);
-    });
-
-    const medals = ['🥇','🥈','🥉'];
-    const rcls = r => r===0?'r1':r===1?'r2':r===2?'r3':'rn';
-    const rowcls = r => r===0?'top1':r===1?'top2':r===2?'top3':'';
-    let html = `
-      <div class="lb-wrap">
-        <div class="lb-title-row">
-          <div class="lb-title">Standings</div>
-          <div class="lb-sub">${data.length} players competing since 2018</div>
-        </div>
-        <div class="lb-header-row">
-          <div></div><div>Player</div>
-          <div>Pts</div><div>Exact</div><div>Result</div>
-        </div>`;
-    data.forEach((u, i) => {
-      const r = rankOf[i];
-      html += `
-        <div class="lb-row ${rowcls(r)}">
-          <div class="rank-cell"><span class="rank-num ${rcls(r)}">${r < 3 ? medals[r] : r+1}</span></div>
-          <div class="lb-name-cell"><div class="lb-name">${escHtml(u.display_name)}</div></div>
-          <div class="lb-pts">${u.total_points??0}</div>
-          <div class="lb-num">${u.exact??'—'}</div>
-          <div class="lb-num">${u.correct??'—'}</div>
-        </div>`;
-    });
-    html += `</div>
-      <div class="rules-box">
-        <div class="rules-title">How It Works</div>
-        <table class="rules-table">
-          <thead>
-            <tr><th>Event</th><th>Points</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>⚽ Exact score</td><td class="pts-col green-pts">+3</td></tr>
-            <tr><td>✅ Correct result (win/draw/loss)</td><td class="pts-col blue-pts">+1</td></tr>
-            <tr><td>❌ Wrong prediction</td><td class="pts-col grey-pts">+0</td></tr>
-          </tbody>
-        </table>
-        <div class="rules-divider"></div>
-        <div class="rules-sub">Tiebreakers (in order)</div>
-        <ol class="rules-list">
-          <li>More exact scores (3-pt calls)</li>
-          <li>Alphabetical order of name</li>
-        </ol>
-        <div class="rules-divider"></div>
-        <div class="rules-list-item">🔒 Predictions lock <strong>60 minutes</strong> after kickoff — submit early!</div>
-      </div>`;
-    document.getElementById('lbList').innerHTML = html;
-  }
-
-  function togglePanel(row) {
-    const panel = row.nextElementSibling;
-    const btn = row.querySelector('.expand-btn');
-    if (!panel) return;
-    const open = panel.classList.toggle('open');
-    btn.textContent = open ? '▴' : '▾';
-  }
-
-  const timers = {};
-  function savePred(input, matchId, userId, side) {
-    const val = input.value.trim();
-    if (val === '') return;
-    const key = `${matchId}__${userId}`;
-    if (!predBuffer[key]) {
-      const [hi, ai] = input.closest('.pred-item').querySelectorAll('.pred-input');
-      predBuffer[key] = {
-        home: hi.value.trim() !== '' ? parseInt(hi.value,10) : null,
-        away: ai.value.trim() !== '' ? parseInt(ai.value,10) : null,
-      };
+      return '<div class="match-card new-card" data-matchid="' + escHtml(m.match_id) + '" onclick="toggleCard(this)">' +
+        '<div class="match-row">' +
+        '<div class="team-cell home"><span class="team-name">' + escHtml(homeTeam) + '</span></div>' +
+        '<div class="centre-block">' +
+        '<div class="score-display">' + sh + '<span class="score-dash">·</span>' + sa + '</div>' +
+        '<div class="match-status">' +
+        '<div class="badge ' + meta.badgeCls + '" data-role="badge">' + meta.badgeTxt + '</div>' +
+        '<div class="match-time" data-role="time">' + meta.timeStr + '</div>' +
+        '</div>' +
+        '</div>' +
+        '<div class="team-cell away"><span class="team-name">' + escHtml(awayTeam) + '</span></div>' +
+        '</div>' +
+        '<div class="predictions-panel"><div class="predictions-panel-inner">' + predsHtml + '</div></div>' +
+        '</div>';
     }
-    predBuffer[key][side] = parseInt(val, 10);
-    if (timers[key]) clearTimeout(timers[key]);
-    timers[key] = setTimeout(() => {
-      const buf = predBuffer[key];
-      if (buf.home === null || buf.away === null) return;
-      showToast('Saving…');
-      fetch(API + '/predictions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, match_id: matchId, pred_home: buf.home, pred_away: buf.away }),
-      }).then(r => r.json()).then(d => {
-        if (d.status === 'saved') showToast('Saved');
-        else showToast(d.error || 'Error saving', true);
-      }).catch(() => showToast('Network error', true));
-    }, 50);
-  }
 
-  async function syncAll() {
-    const btn = document.getElementById('syncBtn');
-    btn.disabled = true;
-    btn.classList.add('spinning');
-    btn.querySelector('.btn-label') && (btn.querySelector('.btn-label').textContent = ' Syncing…');
-    try {
-      const data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
-      showToast(`Synced ${data.count} match${data.count!==1?'es':''}`);
-      const [mu, mm] = await Promise.all([
-        fetch(API + '/users').then(r => r.json()),
-        fetch(API + '/matches').then(r => r.json()),
-      ]);
-      users = mu; matches = mm; sortUsers();
-      cacheSave('wc2026_users', mu); cacheSave('wc2026_matches', mm);
-      localStorage.removeItem('wc2026_leaderboard');
-      renderMatches();
-      if (document.getElementById('leaderboard').classList.contains('active')) renderLeaderboard();
-    } catch { showToast('Sync failed', true); }
-    finally {
-      btn.disabled = false;
-      btn.classList.remove('spinning');
-      const lbl = btn.querySelector('.btn-label');
-      if (lbl) lbl.textContent = ' Sync Scores';
+    // ── FULL DOM BUILD (first paint only) ─────────────────────────────────────
+    function buildMatchDOM() {
+      var container = document.getElementById('matchList');
+      if (!matches.length) { container.innerHTML = '<div class="state-msg">No matches yet.</div>'; return; }
+      var html = '', lastStage = null;
+      matches.forEach(function (m) {
+        if (m.stage !== lastStage) {
+          html += '<div class="stage-header" data-stage="' + escHtml(m.stage) + '">' +
+            '<div class="stage-label">' + (STAGE_LABEL[m.stage] || m.stage) + '</div>' +
+            '<div class="stage-rule"></div></div>';
+          lastStage = m.stage;
+        }
+        html += buildCardHTML(m);
+      });
+      container.innerHTML = html;
     }
-  }
 
-  function showToast(msg, isError = false) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast' + (isError?' error':'') + ' show';
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-  }
+    // ── SURGICAL PATCH (background refreshes — user sees nothing) ─────────────
+    function patchMatchDOM(newMatches, newUsers) {
+      var container = document.getElementById('matchList');
+      if (!container) return;
+      var activeEl = document.activeElement;
 
-  function escHtml(s) {
-    if (!s) return '';
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+      newMatches.forEach(function (nm) {
+        var oldM = null;
+        for (var i = 0; i < matches.length; i++) { if (matches[i].matchid === nm.match_id) { oldM = matches[i]; break; } }
+        var card = container.querySelector('[data-matchid="' + nm.match_id + '"]');
 
-  boot();
-</script>
+        // New match not in DOM — append it
+        if (!card) {
+          var stageEl = container.querySelector('[data-stage="' + nm.stage + '"]');
+          if (!stageEl) {
+            stageEl = document.createElement('div');
+            stageEl.className = 'stage-header';
+            stageEl.dataset.stage = nm.stage;
+            stageEl.innerHTML = '<div class="stage-label">' + (STAGE_LABEL[nm.stage] || nm.stage) + '</div><div class="stage-rule"></div>';
+            container.appendChild(stageEl);
+          }
+          var tmp = document.createElement('div');
+          // temporarily set users/matches context for buildCardHTML
+          var _users = users, _matches = matches;
+          users = newUsers; matches = newMatches;
+          tmp.innerHTML = buildCardHTML(nm);
+          users = _users; matches = _matches;
+          stageEl.insertAdjacentElement('afterend', tmp.firstElementChild);
+          return;
+        }
+
+        var meta = getMatchMeta(nm);
+
+        // Patch team names (in case cache had stale/wrong data)
+        var newHome = nm.team_home || 'TBD';
+        var newAway = nm.team_away || 'TBD';
+        var homeEl = card.querySelector('.team-cell.home .team-name');
+        var awayEl = card.querySelector('.team-cell.away .team-name');
+        if (homeEl && homeEl.textContent !== newHome && newHome !== 'TBD') homeEl.textContent = newHome;
+        if (awayEl && awayEl.textContent !== newAway && newAway !== 'TBD') awayEl.textContent = newAway;
+
+        // Patch scores
+        var sh = card.querySelector('[data-role="sh"]');
+        var sa = card.querySelector('[data-role="sa"]');
+        if (sh && meta.finished && !sh.classList.contains('final')) {
+          sh.className = 'score-num final'; sh.dataset.role = 'sh';
+          sh.textContent = (nm.score_home !== undefined && nm.score_home !== null ? nm.score_home : '');
+        }
+        if (sa && meta.finished && !sa.classList.contains('final')) {
+          sa.className = 'score-num final'; sa.dataset.role = 'sa';
+          sa.textContent = (nm.score_away !== undefined && nm.score_away !== null ? nm.score_away : '');
+        }
+
+        // Patch badge
+        var badge = card.querySelector('[data-role="badge"]');
+        if (badge && badge.textContent !== meta.badgeTxt) {
+          badge.className = 'badge ' + meta.badgeCls;
+          badge.textContent = meta.badgeTxt;
+        }
+
+        // Patch time
+        var timeEl = card.querySelector('[data-role="time"]');
+        if (timeEl && timeEl.textContent !== meta.timeStr) timeEl.textContent = meta.timeStr;
+
+        // Patch per-user predictions
+        newUsers.forEach(function (u) {
+          var pred = nm.predictions ? nm.predictions[u.user_id] : null;
+          var oldPred = (oldM && oldM.predictions) ? oldM.predictions[u.user_id] : null;
+          if (JSON.stringify(pred) === JSON.stringify(oldPred)) return; // nothing changed
+
+          var predItem = card.querySelector('.pred-item[data-userid="' + u.user_id + '"]');
+          if (!predItem) return;
+
+          // Patch pill
+          var pill = predItem.querySelector('[data-role="pill"]');
+          if (pill) {
+            var pts = pred ? pred.points : null;
+            var cls = 'pnd', txt = 'Pending';
+            if (meta.finished) {
+              if (!pred) { cls = 'p0'; txt = 'No pick'; }
+              else if (pts === 3) { cls = 'p3'; txt = '3 Exact'; }
+              else if (pts === 1) { cls = 'p1'; txt = '1 Result'; }
+              else { cls = 'p0'; txt = '0 Miss'; }
+            }
+            pill.className = 'points-pill ' + cls;
+            pill.textContent = txt;
+          }
+
+          // Patch inputs — skip if user is actively editing
+          var inHome = predItem.querySelector('[data-role="input-home"]');
+          var inAway = predItem.querySelector('[data-role="input-away"]');
+          if (inHome && inHome !== activeEl && pred && pred.pred_home !== undefined) inHome.value = pred.pred_home;
+          if (inAway && inAway !== activeEl && pred && pred.pred_away !== undefined) inAway.value = pred.pred_away;
+          if (inHome) inHome.disabled = meta.locked;
+          if (inAway) inAway.disabled = meta.locked;
+        });
+      });
+    }
+
+    // ── TOGGLE CARD ────────────────────────────────────────────────────────────
+    function toggleCard(card) { card.classList.toggle('open'); }
+
+    // ── TABS ───────────────────────────────────────────────────────────────────
+    function switchTab(id, el) {
+      document.querySelectorAll('.tab-content').forEach(function (t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+      document.getElementById(id).classList.add('active');
+      el.classList.add('active');
+      if (id === 'leaderboard') renderLeaderboard();
+    }
+
+    // ── LEADERBOARD ────────────────────────────────────────────────────────────
+    function renderLeaderboard() {
+      var cached = cachePaint('wc2026leaderboard');
+      if (cached && cached.length) renderLBData(cached);
+      else renderLBSkeleton();
+      fetch(API + '/leaderboard').then(function (r) { return r.json(); }).then(function (data) {
+        if (!Array.isArray(data)) return;
+        cacheSave('wc2026leaderboard', data);
+        renderLBData(data);
+      }).catch(function () {
+        if (!cached) document.getElementById('lbList').innerHTML = '<div class="state-msg">Could not load leaderboard.</div>';
+      });
+    }
+
+    function renderLBSkeleton() {
+      var rows = Array.from({ length: 7 }, function () {
+        return '<div class="sk-lb-row">' +
+          '<div class="skel sk-rank"></div><div class="skel sk-name"></div>' +
+          '<div class="skel sk-pts"></div><div class="skel sk-stat"></div><div class="skel sk-stat"></div>' +
+          '</div>';
+      }).join('');
+      document.getElementById('lbList').innerHTML =
+        '<div class="lb-wrap"><div class="lb-title-row"><div class="lb-title">Standings</div></div>' +
+        '<div class="lb-header-row"><div></div><div>Player</div><div>Pts</div><div>Exact</div><div>Result</div></div>' +
+        rows + '</div>';
+    }
+
+    function renderLBData(data) {
+      if (!data.length) { document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>'; return; }
+      data.sort(function (a, b) {
+        if (b.totalpoints !== a.totalpoints) return b.totalpoints - a.totalpoints;
+        if (((b.exact || 0)) !== ((a.exact || 0))) return ((b.exact || 0)) - ((a.exact || 0));
+        return (a.display_name || '').localeCompare(b.display_name || '');
+      });
+      var rankOf = [];
+      data.forEach(function (u, i) {
+        if (i === 0) { rankOf.push(0); return; }
+        var p = data[i - 1];
+        rankOf.push(u.total_points === p.totalpoints && ((u.exact || 0)) === ((p.exact || 0)) ? rankOf[i - 1] : i);
+      });
+      var medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
+      var html = '<div class="lb-wrap">' +
+        '<div class="lb-title-row"><div class="lb-title">Standings</div>' +
+        '<div class="lb-sub">' + data.length + ' player' + (data.length !== 1 ? 's' : '') + ' competing since 2018</div></div>' +
+        '<div class="lb-header-row"><div></div><div>Player</div><div>Pts</div><div>Exact</div><div>Result</div></div>';
+      data.forEach(function (u, i) {
+        var r = rankOf[i];
+        var rcls = r === 0 ? 'r1' : r === 1 ? 'r2' : r === 2 ? 'r3' : 'rn';
+        var rowcls = r === 0 ? 'top1' : r === 1 ? 'top2' : r === 2 ? 'top3' : '';
+        html += '<div class="lb-row ' + rowcls + '">' +
+          '<div class="rank-cell"><span class="rank-num ' + rcls + '">' + (r < 3 ? medals[r] : r + 1) + '</span></div>' +
+          '<div class="lb-name-cell"><div class="lb-name">' + escHtml(u.display_name) + '</div></div>' +
+          '<div class="lb-pts">' + (u.total_points || 0) + '</div>' +
+          '<div class="lb-num">' + ((u.exact || '')) + '</div>' +
+          '<div class="lb-num">' + ((u.correct || '')) + '</div>' +
+          '</div>';
+      });
+      html += '</div>' +
+        '<div class="rules-box">' +
+        '<div class="rules-title">How It Works</div>' +
+        '<table class="rules-table"><thead><tr><th>Event</th><th class="pts-col">Points</th></tr></thead>' +
+        '<tbody>' +
+        '<tr><td>Exact score</td><td class="pts-col"><span class="green-pts">3</span></td></tr>' +
+        '<tr><td>Correct result (win/draw/loss)</td><td class="pts-col"><span class="blue-pts">1</span></td></tr>' +
+        '<tr><td>Wrong prediction</td><td class="pts-col"><span class="grey-pts">0</span></td></tr>' +
+        '</tbody></table>' +
+        '<div class="rules-divider"></div>' +
+        '<div class="rules-sub">Tiebreakers in order</div>' +
+        '<ol class="rules-list"><li>More exact scores (3-pt calls)</li><li>Alphabetical order of name</li></ol>' +
+        '<div class="rules-divider"></div>' +
+        '<div class="rules-list-item">Predictions lock <strong>60 minutes</strong> before kickoff — submit early!</div>' +
+        '</div>';
+      document.getElementById('lbList').innerHTML = html;
+    }
+
+    // ── SAVE PREDICTION ────────────────────────────────────────────────────────
+    // Reads matchid/userid/side from data-attributes — no inline string quoting
+    function savePred(input) {
+      var matchId = input.dataset.matchid;
+      var userId = input.dataset.userid;
+      var side = input.dataset.side;
+      var val = input.value.trim();
+      if (!matchId || !userId || !side || val === '') return;
+      var key = matchId + userId;
+      if (!predBuffer[key]) {
+        var inputs = input.closest('.pred-item').querySelectorAll('.pred-input');
+        predBuffer[key] = {
+          home: inputs[0].value.trim() !== '' ? parseInt(inputs[0].value, 10) : null,
+          away: inputs[1].value.trim() !== '' ? parseInt(inputs[1].value, 10) : null
+        };
+      }
+      predBuffer[key][side] = parseInt(val, 10);
+      if (timers[key]) clearTimeout(timers[key]);
+      timers[key] = setTimeout(function () {
+        var buf = predBuffer[key];
+        if (buf.home === null || buf.away === null) return;
+        showToast('Saving…');
+        fetch(API + '/predictions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, match_id: parseInt(matchId, 10), pred_home: buf.home, pred_away: buf.away })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.status === 'saved') showToast('Saved ✓');
+          else showToast(d.error || 'Error saving', true);
+        }).catch(function () { showToast('Network error', true); });
+      }, 500);
+    }
+
+
+    // ── SYNC ───────────────────────────────────────────────────────────────────
+    async function syncAll() {
+      var btn = document.getElementById('syncBtn');
+      var lbl = btn.querySelector('.btn-label');
+      btn.disabled = true; btn.classList.add('spinning');
+      if (lbl) lbl.textContent = 'Syncing…';
+      try {
+        var data = await fetch(API + '/sync', { method: 'POST' }).then(function (r) { return r.json(); });
+        showToast('Synced ' + data.count + ' match' + (data.count !== 1 ? 'es' : ''));
+        var results = await Promise.all([
+          fetch(API + '/users').then(function (r) { return r.json(); }),
+          fetch(API + '/matches').then(function (r) { return r.json(); })
+        ]);
+        var mu = results[0], mm = results[1];
+        if (!Array.isArray(mu) || !Array.isArray(mm)) throw new Error('bad sync response');
+        mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
+        cacheSave('wc2026users', mu);
+        cacheSave('wc2026matches', mm);
+        localStorage.removeItem('wc2026leaderboard');
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] sync patch error:', e); }
+        users = mu; matches = mm; sortUsers();
+        if (document.getElementById('leaderboard').classList.contains('active')) renderLeaderboard();
+      } catch (e) {
+        console.error('[WC2026] sync failed:', e);
+        showToast('Sync failed', true);
+      } finally {
+        btn.disabled = false; btn.classList.remove('spinning');
+        if (lbl) lbl.textContent = 'Sync Scores';
+      }
+    }
+
+    // ── TOAST ──────────────────────────────────────────────────────────────────
+    function showToast(msg, isError) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast' + (isError ? ' error' : '') + ' show';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
+    }
+
+    boot();
+  </script>
 </body>
+
 </html>
