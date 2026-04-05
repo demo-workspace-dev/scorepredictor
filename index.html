@@ -1135,9 +1135,6 @@
       users = mu; matches = mm; sortUsers();
     }
 
-    // ── TAB VISIBILITY — silent background patch only, never shows skeleton ───
-    let lastVisible = Date.now();
-
     // ── SKELETON ───────────────────────────────────────────────────────────────
     function renderSkeleton() {
       var cards = Array.from({ length: 5 }, function () {
@@ -1540,66 +1537,73 @@
       toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
     }
 
-    // Replace the single boot() call at the bottom with:
     boot();
 
-    // ── SILENT AUTO-POLL every 30s during tournament ──────────────────────────
-    let pollTimer = null;
-    function startPoll() {
-      if (pollTimer) return;
-      pollTimer = setInterval(async function () {
-        // Don't poll if tab is hidden or user is actively typing
-        if (document.hidden) return;
-        if (document.activeElement && document.activeElement.classList.contains('pred-input')) return;
-
-        try {
-          const [mu, mm] = await Promise.all([
-            fetch(API + '/users').then(r => r.ok ? r.json() : null).catch(() => null),
-            fetch(API + '/matches').then(r => r.ok ? r.json() : null).catch(() => null),
-          ]);
-          if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
-          mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-          cacheSave('wc2026users', mu);
-          cacheSave('wc2026matches', mm);
-          try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
-          users = mu; matches = mm; sortUsers();
-          // If leaderboard tab is open, silently refresh it too
-          if (document.getElementById('leaderboard').classList.contains('active')) {
-            fetch(API + '/leaderboard').then(r => r.json()).then(data => {
-              if (Array.isArray(data)) { cacheSave('wc2026leaderboard', data); renderLBData(data); }
-            }).catch(() => { });
-          }
-        } catch (e) { /* silent — network blip, next poll will recover */ }
-      }, 30 * 1000); // every 30 seconds
+    // ── POLL LOGIC ─────────────────────────────────────────────────────────────
+    async function doPoll() {
+      if (document.hidden) return;
+      if (document.activeElement && document.activeElement.classList.contains('pred-input')) return;
+      try {
+        const [mu, mm] = await Promise.all([
+          fetch(API + '/users').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch(API + '/matches').then(r => r.ok ? r.json() : null).catch(() => null),
+        ]);
+        if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
+        mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+        cacheSave('wc2026users', mu);
+        cacheSave('wc2026matches', mm);
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
+        users = mu; matches = mm; sortUsers();
+        if (document.getElementById('leaderboard').classList.contains('active')) {
+          fetch(API + '/leaderboard').then(r => r.json()).then(data => {
+            if (Array.isArray(data)) { cacheSave('wc2026leaderboard', data); renderLBData(data); }
+          }).catch(() => { });
+        }
+      } catch (e) { /* silent — recovers on next tick */ }
     }
 
-    // Start polling once boot is done (slight delay so boot renders first)
-    setTimeout(startPoll, 3000);
+    let fastPoll = null;
+    let slowPoll = null;
+    let idleTimeout = null;
 
-    // Stop polling when tab hidden, restart when visible
+    function startFastPoll() {
+      if (fastPoll) return;
+      fastPoll = setInterval(doPoll, 30 * 1000);
+    }
+
+    function switchToSlowPoll() {
+      if (fastPoll) { clearInterval(fastPoll); fastPoll = null; }
+      slowPoll = setInterval(doPoll, 2 * 60 * 1000);
+    }
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimeout);
+      if (slowPoll) { clearInterval(slowPoll); slowPoll = null; startFastPoll(); }
+      idleTimeout = setTimeout(switchToSlowPoll, 30 * 60 * 1000);
+    }
+
+    // Start polling 3 seconds after boot so initial render finishes first
+    setTimeout(function () {
+      startFastPoll();
+      resetIdleTimer(); // start the 30-min idle countdown immediately
+    }, 3000);
+
+    // Pause/resume on tab visibility
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
-        clearInterval(pollTimer); pollTimer = null;
+        clearInterval(fastPoll); fastPoll = null;
+        clearInterval(slowPoll); slowPoll = null;
       } else {
-        startPoll();
-        // Also do an immediate refresh when tab comes back into focus
-        setTimeout(async function () {
-          try {
-            const [mu, mm] = await Promise.all([
-              fetch(API + '/users').then(r => r.json()).catch(() => null),
-              fetch(API + '/matches').then(r => r.json()).catch(() => null),
-            ]);
-            if (mu && mm && Array.isArray(mu) && Array.isArray(mm)) {
-              mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-              cacheSave('wc2026users', mu);
-              cacheSave('wc2026matches', mm);
-              try { patchMatchDOM(mm, mu); } catch (e) { }
-              users = mu; matches = mm; sortUsers();
-            }
-          } catch (e) { }
-        }, 500);
+        startFastPoll();
+        resetIdleTimer();
+        // Immediate refresh when tab comes back into focus
+        setTimeout(doPoll, 500);
       }
     });
+
+    // Any click or keypress = user is active = reset idle timer
+    document.addEventListener('click', resetIdleTimer);
+    document.addEventListener('keydown', resetIdleTimer);
   </script>
 </body>
 
