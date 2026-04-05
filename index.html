@@ -1057,24 +1057,21 @@
       } catch { try { localStorage.removeItem(key); } catch { } }
     }
 
+    // ── BOOT ───────────────────────────────────────────────────────────────────
+    // KEY FIX: fetch errors and render errors are in SEPARATE try-catches.
+    // A render bug will NEVER show "connection error" to the user.
     async function boot() {
       const pu = cachePaint('wc2026users');
       const pm = cachePaint('wc2026matches');
-
-      // Wipe cache written by older code versions — no team data = stale
-      if (pm && pm[0] && !pm[0].teamhome) {
-        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(function (k) {
-          localStorage.removeItem(k);
-        });
+      // Wipe cache written by older code versions (no team data = stale)
+      if (pm && pm[0] && !pm[0].team) {
+        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(function (k) { localStorage.removeItem(k); });
       }
-
-      const hasValidCache = (
-        Array.isArray(pu) && pu.length > 0 &&
-        Array.isArray(pm) && pm.length > 0 &&
-        pm[0].matchid !== undefined &&
-        pm[0].teamhome !== undefined &&
-        pu[0].userid !== undefined
-      );
+      const hasValidCache = Array.isArray(pu) && pu.length > 0
+        && Array.isArray(pm) && pm.length > 0
+        && pm[0] && pm[0].match_id !== undefined
+        && pm[0].team_home !== undefined
+        && pu[0] && pu[0].user_id !== undefined;
 
       if (hasValidCache) {
         users = pu; matches = pm; sortUsers();
@@ -1083,52 +1080,57 @@
         renderSkeleton();
       }
 
-      // STEP 1 — Fetch, own try-catch, only this shows connection errors
+      // ── STEP 1: Fetch — own try-catch, only this shows connection errors ──
       let mu, mm;
       try {
         const [ru, rm] = await Promise.all([
           fetch(API + '/users').then(r => { if (!r.ok) throw new Error('users ' + r.status); return r.json(); }),
-          fetch(API + '/matches').then(r => { if (!r.ok) throw new Error('matches ' + r.status); return r.json(); }),
+          fetch(API + '/matches').then(r => { if (!r.ok) throw new Error('matches ' + r.status); return r.json(); })
         ]);
         mu = ru; mm = rm;
       } catch (err) {
-        console.error('WC2026 fetch failed', err);
+        console.error('[WC2026] fetch failed:', err);
         if (!hasValidCache) {
-          document.getElementById('matchList').innerHTML = '<div class="state-msg">Could not load data. Check your connection.</div>';
-          showToast('Failed to load data', true);
+          document.getElementById('matchList').innerHTML =
+            '<div class="state-msg">Could not load data. Check your connection.</div>';
         }
-        return; // stop, do not attempt to render
+        showToast('Failed to load data', true);
+        return; // stop — do not attempt to render
       }
 
-      // STEP 2 — Validate shape
+      // ── STEP 2: Validate shape ──────────────────────────────────────────────
+      // Debug: log actual API shape so we can verify field names
       if (!Array.isArray(mu) || !Array.isArray(mm)) {
-        console.error('WC2026 unexpected API response shape', mu, mm);
+        console.error('[WC2026] unexpected API response shape:', mu, mm);
         if (!hasValidCache) {
-          document.getElementById('matchList').innerHTML = '<div class="state-msg">Unexpected response from server.</div>';
+          document.getElementById('matchList').innerHTML =
+            '<div class="state-msg">Unexpected response from server.</div>';
         }
         return;
       }
 
-      mu.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
+      mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
       cacheSave('wc2026users', mu);
       cacheSave('wc2026matches', mm);
 
-      // STEP 3 — Render, own try-catch, render bugs never show conn error
-      // ✅ FIX: snapshot OLD matches BEFORE overwriting globals
-      const oldMatches = matches; // still holds cache (pu/pm) at this point
-      users = mu; matches = mm; sortUsers();
+      // ── STEP 3: Render — own try-catch, render bugs never show conn error ──
+      // REPLACE WITH:
+      users = mu; matches = mm; sortUsers();  // ← update globals FIRST, always
 
       try {
         if (hasValidCache) {
-          patchMatchDOM(mm, mu, oldMatches); // surgical patch over cached DOM
+          patchMatchDOM(mm, mu);   // surgical patch over cached DOM
         } else {
-          buildMatchDOM(); // full build for first ever load
+          buildMatchDOM();         // full build for first ever load
         }
       } catch (err) {
-        console.error('WC2026 render error', err);
-        try { buildMatchDOM(); } catch (e2) { console.error('WC2026 fallback also failed', e2); }
+        console.error('[WC2026] render error:', err);
+        try { buildMatchDOM(); } catch (e2) { console.error('[WC2026] fallback also failed:', e2); }
       }
+
+      users = mu; matches = mm; sortUsers();
     }
+
     // ── SKELETON ───────────────────────────────────────────────────────────────
     function renderSkeleton() {
       var cards = Array.from({ length: 5 }, function () {
@@ -1146,9 +1148,8 @@
     }
 
     // ── UTILS ──────────────────────────────────────────────────────────────────
-    function sortUsers() {
-      users.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
-    }
+    function sortUsers() { users.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); }); }
+
     function parseUTC(str) {
       if (!str) return null;
       var s = str;
@@ -1272,22 +1273,16 @@
       container.innerHTML = html;
     }
 
-    // SURGICAL PATCH — background refreshes, user sees nothing
-    function patchMatchDOM(newMatches, newUsers, prevMatches) {
+    // ── SURGICAL PATCH (background refreshes — user sees nothing) ─────────────
+    function patchMatchDOM(newMatches, newUsers) {
       var container = document.getElementById('matchList');
       if (!container) return;
       var activeEl = document.activeElement;
 
-      // Use the snapshot of OLD matches for diffing — NOT the global `matches`
-      var snapshotMatches = prevMatches || matches;
-
       newMatches.forEach(function (nm) {
         var oldM = null;
-        for (var i = 0; i < snapshotMatches.length; i++) {
-          if (snapshotMatches[i].matchid === nm.matchid) { oldM = snapshotMatches[i]; break; }
-        }
-
-        var card = container.querySelector('[data-matchid="' + nm.matchid + '"]');
+        for (var i = 0; i < matches.length; i++) { if (matches[i].match_id === nm.match_id) { oldM = matches[i]; break; } }
+        var card = container.querySelector('[data-matchid="' + nm.match_id + '"]');
 
         // New match not in DOM — append it
         if (!card) {
@@ -1300,19 +1295,20 @@
             container.appendChild(stageEl);
           }
           var tmp = document.createElement('div');
-          var _u = users, _m = matches;
+          // temporarily set users/matches context for buildCardHTML
+          var _users = users, _matches = matches;
           users = newUsers; matches = newMatches;
           tmp.innerHTML = buildCardHTML(nm);
-          users = _u; matches = _m;
+          users = _users; matches = _matches;
           stageEl.insertAdjacentElement('afterend', tmp.firstElementChild);
           return;
         }
 
         var meta = getMatchMeta(nm);
 
-        // Patch team names
-        var newHome = nm.teamhome || 'TBD';
-        var newAway = nm.teamaway || 'TBD';
+        // Patch team names (in case cache had stale/wrong data)
+        var newHome = nm.team_home || 'TBD';
+        var newAway = nm.team_away || 'TBD';
         var homeEl = card.querySelector('.team-cell.home .team-name');
         var awayEl = card.querySelector('.team-cell.away .team-name');
         if (homeEl && homeEl.textContent !== newHome && newHome !== 'TBD') homeEl.textContent = newHome;
@@ -1323,11 +1319,11 @@
         var sa = card.querySelector('[data-role="sa"]');
         if (sh && meta.finished && !sh.classList.contains('final')) {
           sh.className = 'score-num final'; sh.dataset.role = 'sh';
-          sh.textContent = (nm.scorehome !== undefined && nm.scorehome !== null) ? nm.scorehome : '';
+          sh.textContent = (nm.score_home !== undefined && nm.score_home !== null ? nm.score_home : '');
         }
         if (sa && meta.finished && !sa.classList.contains('final')) {
           sa.className = 'score-num final'; sa.dataset.role = 'sa';
-          sa.textContent = (nm.scoreaway !== undefined && nm.scoreaway !== null) ? nm.scoreaway : '';
+          sa.textContent = (nm.score_away !== undefined && nm.score_away !== null ? nm.score_away : '');
         }
 
         // Patch badge
@@ -1343,13 +1339,11 @@
 
         // Patch per-user predictions
         newUsers.forEach(function (u) {
-          var pred = nm.predictions ? nm.predictions[u.userid] : null;
-          var oldPred = oldM && oldM.predictions ? oldM.predictions[u.userid] : null;
-
-          // ✅ FIX: now oldPred actually comes from the previous snapshot, not the new data
+          var pred = nm.predictions ? nm.predictions[u.user_id] : null;
+          var oldPred = (oldM && oldM.predictions) ? oldM.predictions[u.user_id] : null;
           if (JSON.stringify(pred) === JSON.stringify(oldPred)) return; // nothing changed
 
-          var predItem = card.querySelector('.pred-item[data-userid="' + u.userid + '"]');
+          var predItem = card.querySelector('.pred-item[data-userid="' + u.user_id + '"]');
           if (!predItem) return;
 
           // Patch pill
@@ -1359,9 +1353,9 @@
             var cls = 'pnd', txt = 'Pending';
             if (meta.finished) {
               if (!pred) { cls = 'p0'; txt = 'No pick'; }
-              else if (pts === 3) { cls = 'p3'; txt = '3 · Exact'; }
-              else if (pts === 1) { cls = 'p1'; txt = '1 · Result'; }
-              else { cls = 'p0'; txt = '0 · Miss'; }
+              else if (pts === 3) { cls = 'p3'; txt = '3 Exact'; }
+              else if (pts === 1) { cls = 'p1'; txt = '1 Result'; }
+              else { cls = 'p0'; txt = '0 Miss'; }
             }
             pill.className = 'points-pill ' + cls;
             pill.textContent = txt;
@@ -1370,13 +1364,14 @@
           // Patch inputs — skip if user is actively editing
           var inHome = predItem.querySelector('[data-role="input-home"]');
           var inAway = predItem.querySelector('[data-role="input-away"]');
-          if (inHome && inHome !== activeEl && pred && pred.predhome !== undefined) inHome.value = pred.predhome;
-          if (inAway && inAway !== activeEl && pred && pred.predaway !== undefined) inAway.value = pred.predaway;
+          if (inHome && inHome !== activeEl && pred && pred.pred_home !== undefined) inHome.value = pred.pred_home;
+          if (inAway && inAway !== activeEl && pred && pred.pred_away !== undefined) inAway.value = pred.pred_away;
           if (inHome) inHome.disabled = meta.locked;
           if (inAway) inAway.disabled = meta.locked;
         });
       });
     }
+
     // ── TOGGLE CARD ────────────────────────────────────────────────────────────
     function toggleCard(card) { card.classList.toggle('open'); }
 
@@ -1505,29 +1500,23 @@
       btn.disabled = true; btn.classList.add('spinning');
       if (lbl) lbl.textContent = 'Syncing…';
       try {
-        var data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
+        var data = await fetch(API + '/sync', { method: 'POST' }).then(function (r) { return r.json(); });
         showToast('Synced ' + data.count + ' match' + (data.count !== 1 ? 'es' : ''));
         var results = await Promise.all([
-          fetch(API + '/users').then(r => r.json()),
-          fetch(API + '/matches').then(r => r.json()),
+          fetch(API + '/users').then(function (r) { return r.json(); }),
+          fetch(API + '/matches').then(function (r) { return r.json(); })
         ]);
         var mu = results[0], mm = results[1];
         if (!Array.isArray(mu) || !Array.isArray(mm)) throw new Error('bad sync response');
-        mu.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
+        mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
         localStorage.removeItem('wc2026leaderboard');
-
-        // ✅ FIX: snapshot OLD matches before overwriting globals
-        const oldMatches = matches;
         users = mu; matches = mm; sortUsers();
-
-        try { patchMatchDOM(mm, mu, oldMatches); }
-        catch (e) { console.error('WC2026 sync patch error', e); }
-
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] sync patch error:', e); }
         if (document.getElementById('leaderboard').classList.contains('active')) renderLeaderboard();
       } catch (e) {
-        console.error('WC2026 sync failed', e);
+        console.error('[WC2026] sync failed:', e);
         showToast('Sync failed', true);
       } finally {
         btn.disabled = false; btn.classList.remove('spinning');
@@ -1546,6 +1535,7 @@
 
     boot();
 
+    // ── POLL LOGIC ─────────────────────────────────────────────────────────────
     async function doPoll() {
       if (document.hidden) return;
       if (document.activeElement && document.activeElement.classList.contains('pred-input')) return;
@@ -1555,23 +1545,17 @@
           fetch(API + '/matches').then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
         if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
-        mu.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
+        mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
-
-        // ✅ FIX: snapshot OLD matches before overwriting globals
-        const oldMatches = matches;
         users = mu; matches = mm; sortUsers();
-
-        try { patchMatchDOM(mm, mu, oldMatches); }
-        catch (e) { console.error('WC2026 poll patch error', e); }
-
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
         if (document.getElementById('leaderboard').classList.contains('active')) {
           fetch(API + '/leaderboard').then(r => r.json()).then(data => {
             if (Array.isArray(data)) { cacheSave('wc2026leaderboard', data); renderLBData(data); }
           }).catch(() => { });
         }
-      } catch (e) { /* silent, recovers on next tick */ }
+      } catch (e) { /* silent — recovers on next tick */ }
     }
 
     let fastPoll = null;
