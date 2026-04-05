@@ -1113,22 +1113,22 @@
       cacheSave('wc2026users', mu);
       cacheSave('wc2026matches', mm);
 
-      // ── STEP 3: Render — own try-catch, render bugs never show conn error ──
-      // REPLACE WITH:
-      users = mu; matches = mm; sortUsers();  // ← update globals FIRST, always
-
+      // ── STEP 3: Render
       try {
         if (hasValidCache) {
-          patchMatchDOM(mm, mu);   // surgical patch over cached DOM
+          patchMatchDOM(mm, mu);   // patch while globals are still cached (old)
         } else {
-          buildMatchDOM();         // full build for first ever load
+          buildMatchDOM();
         }
       } catch (err) {
         console.error('[WC2026] render error:', err);
         try { buildMatchDOM(); } catch (e2) { console.error('[WC2026] fallback also failed:', e2); }
       }
 
-      users = mu; matches = mm; sortUsers();
+      // NOW update globals
+      users = mu;
+      matches = mm;
+      sortUsers();
     }
 
     // ── SKELETON ───────────────────────────────────────────────────────────────
@@ -1497,29 +1497,48 @@
     async function syncAll() {
       var btn = document.getElementById('syncBtn');
       var lbl = btn.querySelector('.btn-label');
-      btn.disabled = true; btn.classList.add('spinning');
+      btn.disabled = true;
+      btn.classList.add('spinning');
       if (lbl) lbl.textContent = 'Syncing…';
+
       try {
-        var data = await fetch(API + '/sync', { method: 'POST' }).then(function (r) { return r.json(); });
+        var data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
         showToast('Synced ' + data.count + ' match' + (data.count !== 1 ? 'es' : ''));
+
         var results = await Promise.all([
-          fetch(API + '/users').then(function (r) { return r.json(); }),
-          fetch(API + '/matches').then(function (r) { return r.json(); })
+          fetch(API + '/users').then(r => r.json()),
+          fetch(API + '/matches').then(r => r.json())
         ]);
         var mu = results[0], mm = results[1];
+
         if (!Array.isArray(mu) || !Array.isArray(mm)) throw new Error('bad sync response');
-        mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
+
+        mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+
+        // PATCH FIRST
+        try {
+          patchMatchDOM(mm, mu);
+        } catch (e) {
+          console.error('[WC2026] sync patch error:', e);
+        }
+
+        // THEN update globals + cache
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
         localStorage.removeItem('wc2026leaderboard');
-        users = mu; matches = mm; sortUsers();
-        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] sync patch error:', e); }
-        if (document.getElementById('leaderboard').classList.contains('active')) renderLeaderboard();
+        users = mu;
+        matches = mm;
+        sortUsers();
+
+        if (document.getElementById('leaderboard').classList.contains('active'))
+          renderLeaderboard();
+
       } catch (e) {
         console.error('[WC2026] sync failed:', e);
         showToast('Sync failed', true);
       } finally {
-        btn.disabled = false; btn.classList.remove('spinning');
+        btn.disabled = false;
+        btn.classList.remove('spinning');
         if (lbl) lbl.textContent = 'Sync Scores';
       }
     }
@@ -1538,24 +1557,41 @@
     // ── POLL LOGIC ─────────────────────────────────────────────────────────────
     async function doPoll() {
       if (document.hidden) return;
-      if (document.activeElement && document.activeElement.classList.contains('pred-input')) return;
+      if (document.activeElement?.classList.contains('pred-input')) return;
+
       try {
         const [mu, mm] = await Promise.all([
           fetch(API + '/users').then(r => r.ok ? r.json() : null).catch(() => null),
           fetch(API + '/matches').then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
+
         if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
+
         mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+
+        // PATCH FIRST (old globals are still current)
+        try {
+          patchMatchDOM(mm, mu);
+        } catch (e) {
+          console.error('[WC2026] poll patch error:', e);
+        }
+
+        // THEN update globals + cache
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
-        users = mu; matches = mm; sortUsers();
-        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
+        users = mu;
+        matches = mm;
+        sortUsers();
+
         if (document.getElementById('leaderboard').classList.contains('active')) {
           fetch(API + '/leaderboard').then(r => r.json()).then(data => {
-            if (Array.isArray(data)) { cacheSave('wc2026leaderboard', data); renderLBData(data); }
+            if (Array.isArray(data)) {
+              cacheSave('wc2026leaderboard', data);
+              renderLBData(data);
+            }
           }).catch(() => { });
         }
-      } catch (e) { /* silent — recovers on next tick */ }
+      } catch (e) { /* silent */ }
     }
 
     let fastPoll = null;
