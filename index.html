@@ -1037,7 +1037,7 @@
     const timers = {};
     let matches = [], users = [];
     let toastTimer;
-    const CACHE_TTL = 3 * 60 * 1000;
+    const CACHE_TTL = 45 * 1000;
 
     // ── CACHE ──────────────────────────────────────────────────────────────────
     function cachePaint(key) {
@@ -1137,24 +1137,6 @@
 
     // ── TAB VISIBILITY — silent background patch only, never shows skeleton ───
     let lastVisible = Date.now();
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { lastVisible = Date.now(); return; }
-      const away = Date.now() - lastVisible;
-      if (away > 10 * 60 * 1000 && !cachePaint('wc2026matches')) {
-        Promise.all([
-          fetch(API + '/users').then(r => r.json()).catch(() => null),
-          fetch(API + '/matches').then(r => r.json()).catch(() => null)
-        ]).then(function (results) {
-          const mu = results[0], mm = results[1];
-          if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
-          mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
-          cacheSave('wc2026users', mu);
-          cacheSave('wc2026matches', mm);
-          try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] patch error on visibility:', e); }
-          users = mu; matches = mm; sortUsers();
-        });
-      }
-    });
 
     // ── SKELETON ───────────────────────────────────────────────────────────────
     function renderSkeleton() {
@@ -1306,7 +1288,7 @@
 
       newMatches.forEach(function (nm) {
         var oldM = null;
-        for (var i = 0; i < matches.length; i++) { if (matches[i].matchid === nm.match_id) { oldM = matches[i]; break; } }
+        for (var i = 0; i < matches.length; i++) { if (matches[i].match_id === nm.match_id) { oldM = matches[i]; break; } }
         var card = container.querySelector('[data-matchid="' + nm.match_id + '"]');
 
         // New match not in DOM — append it
@@ -1558,7 +1540,66 @@
       toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
     }
 
+    // Replace the single boot() call at the bottom with:
     boot();
+
+    // ── SILENT AUTO-POLL every 30s during tournament ──────────────────────────
+    let pollTimer = null;
+    function startPoll() {
+      if (pollTimer) return;
+      pollTimer = setInterval(async function () {
+        // Don't poll if tab is hidden or user is actively typing
+        if (document.hidden) return;
+        if (document.activeElement && document.activeElement.classList.contains('pred-input')) return;
+
+        try {
+          const [mu, mm] = await Promise.all([
+            fetch(API + '/users').then(r => r.ok ? r.json() : null).catch(() => null),
+            fetch(API + '/matches').then(r => r.ok ? r.json() : null).catch(() => null),
+          ]);
+          if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
+          mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+          cacheSave('wc2026users', mu);
+          cacheSave('wc2026matches', mm);
+          try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
+          users = mu; matches = mm; sortUsers();
+          // If leaderboard tab is open, silently refresh it too
+          if (document.getElementById('leaderboard').classList.contains('active')) {
+            fetch(API + '/leaderboard').then(r => r.json()).then(data => {
+              if (Array.isArray(data)) { cacheSave('wc2026leaderboard', data); renderLBData(data); }
+            }).catch(() => { });
+          }
+        } catch (e) { /* silent — network blip, next poll will recover */ }
+      }, 30 * 1000); // every 30 seconds
+    }
+
+    // Start polling once boot is done (slight delay so boot renders first)
+    setTimeout(startPoll, 3000);
+
+    // Stop polling when tab hidden, restart when visible
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        clearInterval(pollTimer); pollTimer = null;
+      } else {
+        startPoll();
+        // Also do an immediate refresh when tab comes back into focus
+        setTimeout(async function () {
+          try {
+            const [mu, mm] = await Promise.all([
+              fetch(API + '/users').then(r => r.json()).catch(() => null),
+              fetch(API + '/matches').then(r => r.json()).catch(() => null),
+            ]);
+            if (mu && mm && Array.isArray(mu) && Array.isArray(mm)) {
+              mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+              cacheSave('wc2026users', mu);
+              cacheSave('wc2026matches', mm);
+              try { patchMatchDOM(mm, mu); } catch (e) { }
+              users = mu; matches = mm; sortUsers();
+            }
+          } catch (e) { }
+        }, 500);
+      }
+    });
   </script>
 </body>
 
