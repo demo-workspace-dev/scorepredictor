@@ -1030,7 +1030,7 @@
   </main>
   <div class="toast" id="toast"></div>
 
- <script>
+  <script>
     const API = 'https://sparkling-frost-59a4.satyajeetking.workers.dev';
     const STAGE_LABEL = { group: 'Group Stage', r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter Finals', sf: 'Semi Finals', third: 'Third Place', final: 'Final' };
     const predBuffer = {};
@@ -1050,24 +1050,23 @@
         return null;
       } catch { localStorage.removeItem(key); return null; }
     }
+
     function cacheSave(key, data) {
       try {
         localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
       } catch { try { localStorage.removeItem(key); } catch { } }
     }
 
-    // ── BOOT (FIXED: first-load "No matches" bug) ─────────────────────────────
+    // ── BOOT ───────────────────────────────────────────────────────────────────
+    // KEY FIX: fetch errors and render errors are in SEPARATE try-catches.
+    // A render bug will NEVER show "connection error" to the user.
     async function boot() {
       const pu = cachePaint('wc2026users');
       const pm = cachePaint('wc2026matches');
-      
       // Wipe cache written by older code versions (no team data = stale)
-      if (pm && pm[0] && !pm[0].team_home) {
-        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(function (k) { 
-          localStorage.removeItem(k); 
-        });
+      if (pm && pm[0] && !pm[0].team) {
+        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(function (k) { localStorage.removeItem(k); });
       }
-
       const hasValidCache = Array.isArray(pu) && pu.length > 0
         && Array.isArray(pm) && pm.length > 0
         && pm[0] && pm[0].match_id !== undefined
@@ -1075,23 +1074,20 @@
         && pu[0] && pu[0].user_id !== undefined;
 
       if (hasValidCache) {
-        users = pu; 
-        matches = pm; 
-        sortUsers();
+        users = pu; matches = pm; sortUsers();
         buildMatchDOM();
       } else {
         renderSkeleton();
       }
 
-      // ── Fetch fresh data
+      // ── STEP 1: Fetch — own try-catch, only this shows connection errors ──
       let mu, mm;
       try {
         const [ru, rm] = await Promise.all([
           fetch(API + '/users').then(r => { if (!r.ok) throw new Error('users ' + r.status); return r.json(); }),
           fetch(API + '/matches').then(r => { if (!r.ok) throw new Error('matches ' + r.status); return r.json(); })
         ]);
-        mu = ru; 
-        mm = rm;
+        mu = ru; mm = rm;
       } catch (err) {
         console.error('[WC2026] fetch failed:', err);
         if (!hasValidCache) {
@@ -1099,9 +1095,11 @@
             '<div class="state-msg">Could not load data. Check your connection.</div>';
         }
         showToast('Failed to load data', true);
-        return;
+        return; // stop — do not attempt to render
       }
 
+      // ── STEP 2: Validate shape ──────────────────────────────────────────────
+      // Debug: log actual API shape so we can verify field names
       if (!Array.isArray(mu) || !Array.isArray(mm)) {
         console.error('[WC2026] unexpected API response shape:', mu, mm);
         if (!hasValidCache) {
@@ -1115,21 +1113,22 @@
       cacheSave('wc2026users', mu);
       cacheSave('wc2026matches', mm);
 
-      // ── FIXED: Update globals FIRST, then render (fixes first-load "No matches")
-      users = mu;
-      matches = mm;
-      sortUsers();
+      // ── STEP 3: Render — own try-catch, render bugs never show conn error ──
+      // REPLACE WITH:
+      users = mu; matches = mm; sortUsers();  // ← update globals FIRST, always
 
       try {
         if (hasValidCache) {
-          patchMatchDOM(mm, mu);
+          patchMatchDOM(mm, mu);   // surgical patch over cached DOM
         } else {
-          buildMatchDOM();
+          buildMatchDOM();         // full build for first ever load
         }
       } catch (err) {
         console.error('[WC2026] render error:', err);
         try { buildMatchDOM(); } catch (e2) { console.error('[WC2026] fallback also failed:', e2); }
       }
+
+      users = mu; matches = mm; sortUsers();
     }
 
     // ── SKELETON ───────────────────────────────────────────────────────────────
@@ -1150,6 +1149,7 @@
 
     // ── UTILS ──────────────────────────────────────────────────────────────────
     function sortUsers() { users.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); }); }
+
     function parseUTC(str) {
       if (!str) return null;
       var s = str;
@@ -1157,6 +1157,7 @@
       var d = new Date(s);
       return isNaN(d.getTime()) ? null : d;
     }
+
     function fmtDate(dt) {
       return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
     }
@@ -1167,6 +1168,7 @@
       if (!s) return '';
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
+
     function getMatchMeta(m) {
       var finished = m.status === 'FINISHED';
       var kickoffDt = parseUTC(m.kickoff);
@@ -1197,6 +1199,7 @@
       var dis = locked ? 'disabled' : '';
       var uid = escHtml(u.user_id);
       var mid = escHtml(matchid);
+      // data-matchid/userid/side on each input — no inline quote escaping needed
       return '<div class="pred-item" data-userid="' + uid + '">' +
         '<div class="pred-name">' + escHtml(u.display_name) + '</div>' +
         '<div class="pred-score-row">' +
@@ -1215,6 +1218,7 @@
     // ── BUILD FULL CARD HTML ───────────────────────────────────────────────────
     function buildCardHTML(m) {
       var meta = getMatchMeta(m);
+      // API uses snake_case: m.team_home / m.team_away
       var homeTeam = m.team_home || 'TBD';
       var awayTeam = m.team_away || 'TBD';
       var sh = meta.finished
@@ -1223,6 +1227,7 @@
       var sa = meta.finished
         ? '<span class="score-num final" data-role="sa">' + ((m.score_away !== undefined && m.score_away !== null ? m.score_away : '')) + '</span>'
         : '<span class="score-num pending" data-role="sa">–</span>';
+
       var predsHtml = '';
       if (users.length) {
         predsHtml = '<div class="pred-grid">';
@@ -1234,6 +1239,7 @@
       } else {
         predsHtml = '<div style="color:var(--ink4);font-family:Instrument Serif,serif;font-style:italic;font-size:0.9rem">No players added yet.</div>';
       }
+
       return '<div class="match-card new-card" data-matchid="' + escHtml(m.match_id) + '" onclick="toggleCard(this)">' +
         '<div class="match-row">' +
         '<div class="team-cell home"><span class="team-name">' + escHtml(homeTeam) + '</span></div>' +
@@ -1250,13 +1256,10 @@
         '</div>';
     }
 
-    // ── FULL DOM BUILD ─────────────────────────────────────────────────────────
+    // ── FULL DOM BUILD (first paint only) ─────────────────────────────────────
     function buildMatchDOM() {
       var container = document.getElementById('matchList');
-      if (!matches.length) { 
-        container.innerHTML = '<div class="state-msg">No matches scheduled yet.</div>'; 
-        return; 
-      }
+      if (!matches.length) { container.innerHTML = '<div class="state-msg">No matches yet.</div>'; return; }
       var html = '', lastStage = null;
       matches.forEach(function (m) {
         if (m.stage !== lastStage) {
@@ -1270,15 +1273,18 @@
       container.innerHTML = html;
     }
 
-    // ── SURGICAL PATCH ─────────────────────────────────────────────────────────
+    // ── SURGICAL PATCH (background refreshes — user sees nothing) ─────────────
     function patchMatchDOM(newMatches, newUsers) {
       var container = document.getElementById('matchList');
       if (!container) return;
       var activeEl = document.activeElement;
+
       newMatches.forEach(function (nm) {
         var oldM = null;
         for (var i = 0; i < matches.length; i++) { if (matches[i].match_id === nm.match_id) { oldM = matches[i]; break; } }
         var card = container.querySelector('[data-matchid="' + nm.match_id + '"]');
+
+        // New match not in DOM — append it
         if (!card) {
           var stageEl = container.querySelector('[data-stage="' + nm.stage + '"]');
           if (!stageEl) {
@@ -1289,6 +1295,7 @@
             container.appendChild(stageEl);
           }
           var tmp = document.createElement('div');
+          // temporarily set users/matches context for buildCardHTML
           var _users = users, _matches = matches;
           users = newUsers; matches = newMatches;
           tmp.innerHTML = buildCardHTML(nm);
@@ -1296,7 +1303,10 @@
           stageEl.insertAdjacentElement('afterend', tmp.firstElementChild);
           return;
         }
+
         var meta = getMatchMeta(nm);
+
+        // Patch team names (in case cache had stale/wrong data)
         var newHome = nm.team_home || 'TBD';
         var newAway = nm.team_away || 'TBD';
         var homeEl = card.querySelector('.team-cell.home .team-name');
@@ -1304,6 +1314,7 @@
         if (homeEl && homeEl.textContent !== newHome && newHome !== 'TBD') homeEl.textContent = newHome;
         if (awayEl && awayEl.textContent !== newAway && newAway !== 'TBD') awayEl.textContent = newAway;
 
+        // Patch scores
         var sh = card.querySelector('[data-role="sh"]');
         var sa = card.querySelector('[data-role="sa"]');
         if (sh && meta.finished && !sh.classList.contains('final')) {
@@ -1315,21 +1326,27 @@
           sa.textContent = (nm.score_away !== undefined && nm.score_away !== null ? nm.score_away : '');
         }
 
+        // Patch badge
         var badge = card.querySelector('[data-role="badge"]');
         if (badge && badge.textContent !== meta.badgeTxt) {
           badge.className = 'badge ' + meta.badgeCls;
           badge.textContent = meta.badgeTxt;
         }
+
+        // Patch time
         var timeEl = card.querySelector('[data-role="time"]');
         if (timeEl && timeEl.textContent !== meta.timeStr) timeEl.textContent = meta.timeStr;
 
+        // Patch per-user predictions
         newUsers.forEach(function (u) {
           var pred = nm.predictions ? nm.predictions[u.user_id] : null;
           var oldPred = (oldM && oldM.predictions) ? oldM.predictions[u.user_id] : null;
-          if (JSON.stringify(pred) === JSON.stringify(oldPred)) return;
+          if (JSON.stringify(pred) === JSON.stringify(oldPred)) return; // nothing changed
+
           var predItem = card.querySelector('.pred-item[data-userid="' + u.user_id + '"]');
           if (!predItem) return;
 
+          // Patch pill
           var pill = predItem.querySelector('[data-role="pill"]');
           if (pill) {
             var pts = pred ? pred.points : null;
@@ -1344,6 +1361,7 @@
             pill.textContent = txt;
           }
 
+          // Patch inputs — skip if user is actively editing
           var inHome = predItem.querySelector('[data-role="input-home"]');
           var inAway = predItem.querySelector('[data-role="input-away"]');
           if (inHome && inHome !== activeEl && pred && pred.pred_home !== undefined) inHome.value = pred.pred_home;
@@ -1379,6 +1397,7 @@
         if (!cached) document.getElementById('lbList').innerHTML = '<div class="state-msg">Could not load leaderboard.</div>';
       });
     }
+
     function renderLBSkeleton() {
       var rows = Array.from({ length: 7 }, function () {
         return '<div class="sk-lb-row">' +
@@ -1392,56 +1411,36 @@
         rows + '</div>';
     }
 
-    // ── RENDER LEADERBOARD (FIXED: medal bug) ──────────────────────────────────
     function renderLBData(data) {
-      if (!data.length) { 
-        document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>'; 
-        return; 
-      }
-
+      if (!data.length) { document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>'; return; }
       data.sort(function (a, b) {
         if (b.total_points !== a.total_points) return b.total_points - a.total_points;
         if (((b.exact || 0)) !== ((a.exact || 0))) return ((b.exact || 0)) - ((a.exact || 0));
         return (a.display_name || '').localeCompare(b.display_name || '');
       });
-
+      var rankOf = [];
+      data.forEach(function (u, i) {
+        if (i === 0) { rankOf.push(0); return; }
+        var p = data[i - 1];
+        rankOf.push(u.total_points === p.total_points && ((u.exact || 0)) === ((p.exact || 0)) ? rankOf[i - 1] : i);
+      });
+      var medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
       var html = '<div class="lb-wrap">' +
         '<div class="lb-title-row"><div class="lb-title">Standings</div>' +
         '<div class="lb-sub">' + data.length + ' player' + (data.length !== 1 ? 's' : '') + ' competing since 2018</div></div>' +
         '<div class="lb-header-row"><div></div><div>Player</div><div>Pts</div><div>Exact</div><div>Result</div></div>';
-
-      const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
-      let currentRank = 1;
-
       data.forEach(function (u, i) {
-        if (i > 0) {
-          const prev = data[i - 1];
-          if (u.total_points !== prev.total_points || 
-              (u.exact || 0) !== (prev.exact || 0)) {
-            currentRank = i + 1;
-          }
-        }
-
-        const isTop3 = currentRank <= 3;
-        const rcls = currentRank === 1 ? 'r1' : 
-                     currentRank === 2 ? 'r2' : 
-                     currentRank === 3 ? 'r3' : 'rn';
-        
-        const rowcls = currentRank === 1 ? 'top1' : 
-                       currentRank === 2 ? 'top2' : 
-                       currentRank === 3 ? 'top3' : '';
-
-        const displayRank = isTop3 ? medals[currentRank-1] : currentRank;
-
+        var r = rankOf[i];
+        var rcls = r === 0 ? 'r1' : r === 1 ? 'r2' : r === 2 ? 'r3' : 'rn';
+        var rowcls = r === 0 ? 'top1' : r === 1 ? 'top2' : r === 2 ? 'top3' : '';
         html += '<div class="lb-row ' + rowcls + '">' +
-          '<div class="rank-cell"><span class="rank-num ' + rcls + '">' + displayRank + '</span></div>' +
+          '<div class="rank-cell"><span class="rank-num ' + rcls + '">' + (r < 3 ? medals[r] : r + 1) + '</span></div>' +
           '<div class="lb-name-cell"><div class="lb-name">' + escHtml(u.display_name) + '</div></div>' +
           '<div class="lb-pts">' + (u.total_points || 0) + '</div>' +
           '<div class="lb-num">' + ((u.exact || '')) + '</div>' +
           '<div class="lb-num">' + ((u.correct || '')) + '</div>' +
           '</div>';
       });
-
       html += '</div>' +
         '<div class="rules-box">' +
         '<div class="rules-title">How It Works</div>' +
@@ -1457,11 +1456,11 @@
         '<div class="rules-divider"></div>' +
         '<div class="rules-list-item">Predictions lock <strong>60 minutes</strong> before kickoff — submit early!</div>' +
         '</div>';
-
       document.getElementById('lbList').innerHTML = html;
     }
 
     // ── SAVE PREDICTION ────────────────────────────────────────────────────────
+    // Reads matchid/userid/side from data-attributes — no inline string quoting
     function savePred(input) {
       var matchId = input.dataset.matchid;
       var userId = input.dataset.userid;
@@ -1493,42 +1492,34 @@
       }, 500);
     }
 
+
     // ── SYNC ───────────────────────────────────────────────────────────────────
     async function syncAll() {
       var btn = document.getElementById('syncBtn');
       var lbl = btn.querySelector('.btn-label');
-      btn.disabled = true;
-      btn.classList.add('spinning');
+      btn.disabled = true; btn.classList.add('spinning');
       if (lbl) lbl.textContent = 'Syncing…';
       try {
-        var data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
+        var data = await fetch(API + '/sync', { method: 'POST' }).then(function (r) { return r.json(); });
         showToast('Synced ' + data.count + ' match' + (data.count !== 1 ? 'es' : ''));
         var results = await Promise.all([
-          fetch(API + '/users').then(r => r.json()),
-          fetch(API + '/matches').then(r => r.json())
+          fetch(API + '/users').then(function (r) { return r.json(); }),
+          fetch(API + '/matches').then(function (r) { return r.json(); })
         ]);
         var mu = results[0], mm = results[1];
         if (!Array.isArray(mu) || !Array.isArray(mm)) throw new Error('bad sync response');
-        mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-        try {
-          patchMatchDOM(mm, mu);
-        } catch (e) {
-          console.error('[WC2026] sync patch error:', e);
-        }
+        mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
         localStorage.removeItem('wc2026leaderboard');
-        users = mu;
-        matches = mm;
-        sortUsers();
-        if (document.getElementById('leaderboard').classList.contains('active'))
-          renderLeaderboard();
+        users = mu; matches = mm; sortUsers();
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] sync patch error:', e); }
+        if (document.getElementById('leaderboard').classList.contains('active')) renderLeaderboard();
       } catch (e) {
         console.error('[WC2026] sync failed:', e);
         showToast('Sync failed', true);
       } finally {
-        btn.disabled = false;
-        btn.classList.remove('spinning');
+        btn.disabled = false; btn.classList.remove('spinning');
         if (lbl) lbl.textContent = 'Sync Scores';
       }
     }
@@ -1542,10 +1533,12 @@
       toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
     }
 
+    boot();
+
     // ── POLL LOGIC ─────────────────────────────────────────────────────────────
     async function doPoll() {
       if (document.hidden) return;
-      if (document.activeElement?.classList.contains('pred-input')) return;
+      if (document.activeElement && document.activeElement.classList.contains('pred-input')) return;
       try {
         const [mu, mm] = await Promise.all([
           fetch(API + '/users').then(r => r.ok ? r.json() : null).catch(() => null),
@@ -1553,50 +1546,45 @@
         ]);
         if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
         mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-        try {
-          patchMatchDOM(mm, mu);
-        } catch (e) {
-          console.error('[WC2026] poll patch error:', e);
-        }
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
-        users = mu;
-        matches = mm;
-        sortUsers();
+        users = mu; matches = mm; sortUsers();
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
         if (document.getElementById('leaderboard').classList.contains('active')) {
           fetch(API + '/leaderboard').then(r => r.json()).then(data => {
-            if (Array.isArray(data)) {
-              cacheSave('wc2026leaderboard', data);
-              renderLBData(data);
-            }
+            if (Array.isArray(data)) { cacheSave('wc2026leaderboard', data); renderLBData(data); }
           }).catch(() => { });
         }
-      } catch (e) { /* silent */ }
+      } catch (e) { /* silent — recovers on next tick */ }
     }
 
     let fastPoll = null;
     let slowPoll = null;
     let idleTimeout = null;
+
     function startFastPoll() {
       if (fastPoll) return;
       fastPoll = setInterval(doPoll, 30 * 1000);
     }
+
     function switchToSlowPoll() {
       if (fastPoll) { clearInterval(fastPoll); fastPoll = null; }
       slowPoll = setInterval(doPoll, 2 * 60 * 1000);
     }
+
     function resetIdleTimer() {
       clearTimeout(idleTimeout);
       if (slowPoll) { clearInterval(slowPoll); slowPoll = null; startFastPoll(); }
       idleTimeout = setTimeout(switchToSlowPoll, 30 * 60 * 1000);
     }
 
-    // Start polling 3 seconds after boot
+    // Start polling 3 seconds after boot so initial render finishes first
     setTimeout(function () {
       startFastPoll();
-      resetIdleTimer();
+      resetIdleTimer(); // start the 30-min idle countdown immediately
     }, 3000);
 
+    // Pause/resume on tab visibility
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
         clearInterval(fastPoll); fastPoll = null;
@@ -1604,15 +1592,15 @@
       } else {
         startFastPoll();
         resetIdleTimer();
+        // Immediate refresh when tab comes back into focus
         setTimeout(doPoll, 500);
       }
     });
+
+    // Any click or keypress = user is active = reset idle timer
     document.addEventListener('click', resetIdleTimer);
     document.addEventListener('keydown', resetIdleTimer);
-
-    // ── START THE APP ──────────────────────────────────────────────────────────
-    boot();
-</script>
+  </script>
 </body>
 
 </html>
