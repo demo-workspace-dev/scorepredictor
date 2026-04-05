@@ -1109,7 +1109,7 @@
         return;
       }
 
-      mu.sort((a, b) => a.displayname.localeCompare(b.displayname));
+      mu.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
       cacheSave('wc2026users', mu);
       cacheSave('wc2026matches', mm);
 
@@ -1146,8 +1146,9 @@
     }
 
     // ── UTILS ──────────────────────────────────────────────────────────────────
-    function sortUsers() { users.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); }); }
-
+    function sortUsers() {
+      users.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
+    }
     function parseUTC(str) {
       if (!str) return null;
       var s = str;
@@ -1512,7 +1513,7 @@
         ]);
         var mu = results[0], mm = results[1];
         if (!Array.isArray(mu) || !Array.isArray(mm)) throw new Error('bad sync response');
-        mu.sort((a, b) => a.displayname.localeCompare(b.displayname));
+        mu.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
         localStorage.removeItem('wc2026leaderboard');
@@ -1554,7 +1555,7 @@
           fetch(API + '/matches').then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
         if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
-        mu.sort((a, b) => a.displayname.localeCompare(b.displayname));
+        mu.sort((a, b) => (a.displayname || '').localeCompare(b.displayname || ''));
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
 
