@@ -1057,21 +1057,24 @@
       } catch { try { localStorage.removeItem(key); } catch { } }
     }
 
-    // ── BOOT ───────────────────────────────────────────────────────────────────
-    // KEY FIX: fetch errors and render errors are in SEPARATE try-catches.
-    // A render bug will NEVER show "connection error" to the user.
     async function boot() {
       const pu = cachePaint('wc2026users');
       const pm = cachePaint('wc2026matches');
-      // Wipe cache written by older code versions (no team data = stale)
-      if (pm && pm[0] && !pm[0].team) {
-        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(function (k) { localStorage.removeItem(k); });
+
+      // Wipe cache written by older code versions — no team data = stale
+      if (pm && pm[0] && !pm[0].teamhome) {
+        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(function (k) {
+          localStorage.removeItem(k);
+        });
       }
-      const hasValidCache = Array.isArray(pu) && pu.length > 0
-        && Array.isArray(pm) && pm.length > 0
-        && pm[0] && pm[0].match_id !== undefined
-        && pm[0].team_home !== undefined
-        && pu[0] && pu[0].user_id !== undefined;
+
+      const hasValidCache = (
+        Array.isArray(pu) && pu.length > 0 &&
+        Array.isArray(pm) && pm.length > 0 &&
+        pm[0].matchid !== undefined &&
+        pm[0].teamhome !== undefined &&
+        pu[0].userid !== undefined
+      );
 
       if (hasValidCache) {
         users = pu; matches = pm; sortUsers();
@@ -1080,57 +1083,52 @@
         renderSkeleton();
       }
 
-      // ── STEP 1: Fetch — own try-catch, only this shows connection errors ──
+      // STEP 1 — Fetch, own try-catch, only this shows connection errors
       let mu, mm;
       try {
         const [ru, rm] = await Promise.all([
           fetch(API + '/users').then(r => { if (!r.ok) throw new Error('users ' + r.status); return r.json(); }),
-          fetch(API + '/matches').then(r => { if (!r.ok) throw new Error('matches ' + r.status); return r.json(); })
+          fetch(API + '/matches').then(r => { if (!r.ok) throw new Error('matches ' + r.status); return r.json(); }),
         ]);
         mu = ru; mm = rm;
       } catch (err) {
-        console.error('[WC2026] fetch failed:', err);
+        console.error('WC2026 fetch failed', err);
         if (!hasValidCache) {
-          document.getElementById('matchList').innerHTML =
-            '<div class="state-msg">Could not load data. Check your connection.</div>';
+          document.getElementById('matchList').innerHTML = '<div class="state-msg">Could not load data. Check your connection.</div>';
+          showToast('Failed to load data', true);
         }
-        showToast('Failed to load data', true);
-        return; // stop — do not attempt to render
+        return; // stop, do not attempt to render
       }
 
-      // ── STEP 2: Validate shape ──────────────────────────────────────────────
-      // Debug: log actual API shape so we can verify field names
+      // STEP 2 — Validate shape
       if (!Array.isArray(mu) || !Array.isArray(mm)) {
-        console.error('[WC2026] unexpected API response shape:', mu, mm);
+        console.error('WC2026 unexpected API response shape', mu, mm);
         if (!hasValidCache) {
-          document.getElementById('matchList').innerHTML =
-            '<div class="state-msg">Unexpected response from server.</div>';
+          document.getElementById('matchList').innerHTML = '<div class="state-msg">Unexpected response from server.</div>';
         }
         return;
       }
 
-      mu.sort(function (a, b) { return (a.display_name || '').localeCompare(b.display_name || ''); });
+      mu.sort((a, b) => a.displayname.localeCompare(b.displayname));
       cacheSave('wc2026users', mu);
       cacheSave('wc2026matches', mm);
 
-      // ── STEP 3: Render — own try-catch, render bugs never show conn error ──
-      // REPLACE WITH:
-      users = mu; matches = mm; sortUsers();  // ← update globals FIRST, always
+      // STEP 3 — Render, own try-catch, render bugs never show conn error
+      // ✅ FIX: snapshot OLD matches BEFORE overwriting globals
+      const oldMatches = matches; // still holds cache (pu/pm) at this point
+      users = mu; matches = mm; sortUsers();
 
       try {
         if (hasValidCache) {
-          patchMatchDOM(mm, mu);   // surgical patch over cached DOM
+          patchMatchDOM(mm, mu, oldMatches); // surgical patch over cached DOM
         } else {
-          buildMatchDOM();         // full build for first ever load
+          buildMatchDOM(); // full build for first ever load
         }
       } catch (err) {
-        console.error('[WC2026] render error:', err);
-        try { buildMatchDOM(); } catch (e2) { console.error('[WC2026] fallback also failed:', e2); }
+        console.error('WC2026 render error', err);
+        try { buildMatchDOM(); } catch (e2) { console.error('WC2026 fallback also failed', e2); }
       }
-
-      users = mu; matches = mm; sortUsers();
     }
-
     // ── SKELETON ───────────────────────────────────────────────────────────────
     function renderSkeleton() {
       var cards = Array.from({ length: 5 }, function () {
