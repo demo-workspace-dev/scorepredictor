@@ -9,9 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- NEW: Preload the font CSS (starts downloading immediately) -->
   <link rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap"
-        as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap"
+    as="style" onload="this.onload=null;this.rel='stylesheet'">
 
   <!-- Fallback link (still needed for browsers that don’t support preload) -->
   <link
@@ -103,7 +102,7 @@
     .logo-sub {
       font-family: "Barlow Condensed", sans-serif;
       font-weight: 300;
-      font-size: 0.78rem;
+      font-size: 0.95rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.5);
@@ -165,7 +164,7 @@
     .tab {
       font-family: "Barlow Condensed", sans-serif;
       font-weight: 700;
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.35);
@@ -213,7 +212,7 @@
     .stage-label {
       font-family: "Barlow Condensed", sans-serif;
       font-weight: 800;
-      font-size: 0.75rem;
+      font-size: 0.88rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--ink3);
@@ -937,70 +936,76 @@
     @media(max-width:560px) {
       .header-top {
         padding: 0 16px;
-        height: 54px
+        height: 54px;
       }
 
       .logo-main {
-        font-size: 1.2rem
+        font-size: 1.2rem;
+      }
+
+      .logo-sub {
+        font-size: 0.85rem;
+        /* ← also increased for mobile */
       }
 
       .tabs-wrapper {
         padding: 0 16px;
-        top: 54px
+        top: 54px;
       }
 
       .tab {
         padding: 11px 14px 9px;
-        font-size: 0.78rem
+        font-size: 0.88rem;
+        /* ← increased for mobile */
       }
 
       main {
-        padding: 24px 14px 100px
+        padding: 24px 14px 100px;
       }
 
       .team-name {
         font-size: 0.9rem;
-        max-width: 100%
+        max-width: 100%;
       }
 
       .team-cell {
-        padding: 12px 12px
+        padding: 12px 12px;
       }
 
       .match-row {
-        grid-template-columns: 1fr 106px 1fr
+        grid-template-columns: 1fr 106px 1fr;
       }
 
       .centre-block {
         min-width: 0;
-        padding: 10px 6px
+        padding: 10px 6px;
       }
 
       .score-display {
-        font-size: 1.6rem
+        font-size: 1.6rem;
       }
 
       .lb-header-row,
       .lb-row {
         grid-template-columns: 44px 1fr 64px 44px 48px;
-        padding: 12px 14px
+        padding: 12px 14px;
       }
 
       .lb-pts {
-        font-size: 1.2rem
+        font-size: 1.2rem;
       }
 
       .lb-name {
-        font-size: 0.9rem
+        font-size: 0.9rem;
       }
 
       .sk-lb-row {
         grid-template-columns: 44px 1fr 64px 44px 48px;
-        padding: 12px 14px
+        padding: 12px 14px;
       }
 
       .pred-grid {
-        grid-template-columns: 1fr 1fr
+        grid-template-columns: 1fr 1fr;
       }
     }
   </style>
