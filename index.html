@@ -1114,22 +1114,18 @@
       cacheSave('wc2026matches', mm);
 
       // ── STEP 3: Render — own try-catch, render bugs never show conn error ──
+      // REPLACE WITH:
+      users = mu; matches = mm; sortUsers();  // ← update globals FIRST, always
+
       try {
         if (hasValidCache) {
-          patchMatchDOM(mm, mu);
+          patchMatchDOM(mm, mu);   // surgical patch over cached DOM
         } else {
-          users = mu; matches = mm; sortUsers();
-          buildMatchDOM();
+          buildMatchDOM();         // full build for first ever load
         }
       } catch (err) {
         console.error('[WC2026] render error:', err);
-        // Fallback: force a full clean rebuild
-        try {
-          users = mu; matches = mm; sortUsers();
-          buildMatchDOM();
-        } catch (e2) {
-          console.error('[WC2026] fallback render also failed:', e2);
-        }
+        try { buildMatchDOM(); } catch (e2) { console.error('[WC2026] fallback also failed:', e2); }
       }
 
       users = mu; matches = mm; sortUsers();
@@ -1418,7 +1414,7 @@
     function renderLBData(data) {
       if (!data.length) { document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>'; return; }
       data.sort(function (a, b) {
-        if (b.totalpoints !== a.totalpoints) return b.totalpoints - a.totalpoints;
+        if (b.total_points !== a.total_points) return b.total_points - a.total_points;
         if (((b.exact || 0)) !== ((a.exact || 0))) return ((b.exact || 0)) - ((a.exact || 0));
         return (a.display_name || '').localeCompare(b.display_name || '');
       });
@@ -1426,7 +1422,7 @@
       data.forEach(function (u, i) {
         if (i === 0) { rankOf.push(0); return; }
         var p = data[i - 1];
-        rankOf.push(u.total_points === p.totalpoints && ((u.exact || 0)) === ((p.exact || 0)) ? rankOf[i - 1] : i);
+        rankOf.push(u.total_points === p.total_points && ((u.exact || 0)) === ((p.exact || 0)) ? rankOf[i - 1] : i);
       });
       var medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
       var html = '<div class="lb-wrap">' +
@@ -1516,8 +1512,8 @@
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
         localStorage.removeItem('wc2026leaderboard');
-        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] sync patch error:', e); }
         users = mu; matches = mm; sortUsers();
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] sync patch error:', e); }
         if (document.getElementById('leaderboard').classList.contains('active')) renderLeaderboard();
       } catch (e) {
         console.error('[WC2026] sync failed:', e);
@@ -1552,8 +1548,8 @@
         mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
         cacheSave('wc2026users', mu);
         cacheSave('wc2026matches', mm);
-        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
         users = mu; matches = mm; sortUsers();
+        try { patchMatchDOM(mm, mu); } catch (e) { console.error('[WC2026] poll patch error:', e); }
         if (document.getElementById('leaderboard').classList.contains('active')) {
           fetch(API + '/leaderboard').then(r => r.json()).then(data => {
             if (Array.isArray(data)) { cacheSave('wc2026leaderboard', data); renderLBData(data); }
