@@ -1405,16 +1405,19 @@
     }
 
     function renderLeaderboard() {
-      var cached = cachePaint('wc2026leaderboard');
-      if (cached && cached.length) renderLBData(cached);
-      else renderLBSkeleton();
-      fetch(API + '/leaderboard').then(function (r) { return r.json(); }).then(function (data) {
-        if (!Array.isArray(data)) return;
-        cacheSave('wc2026leaderboard', data);
-        renderLBData(data);
-      }).catch(function () {
-        if (!cached) document.getElementById('lbList').innerHTML = '<div class="state-msg">Could not load leaderboard.</div>';
-      });
+      // Always show skeleton
+      renderLBSkeleton();
+
+      fetch(API + '/leaderboard')
+        .then(res => res.json())
+        .then(data => {
+          if (!Array.isArray(data)) return;
+          renderLBData(data); // render fresh data directly
+        })
+        .catch(() => {
+          document.getElementById('lbList').innerHTML =
+            '<div class="state-msg">Could not load leaderboard.</div>';
+        });
     }
 
     function renderLBSkeleton() {
