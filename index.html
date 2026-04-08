@@ -1067,6 +1067,7 @@
     let matches = [], users = [];
     let toastTimer;
     const CACHE_TTL = 45 * 1000;
+    let lbInitialized = false;
 
     // ── CACHE ──────────────────────────────────────────────────────────────────
     function cachePaint(key) {
@@ -1405,18 +1406,19 @@
     }
 
     function renderLeaderboard() {
-      // Always show skeleton
+      if (lbInitialized) return; // already rendered, let polls handle updates
+      lbInitialized = true;
       renderLBSkeleton();
-
       fetch(API + '/leaderboard')
         .then(res => res.json())
         .then(data => {
           if (!Array.isArray(data)) return;
-          renderLBData(data); // render fresh data directly
+          renderLBData(data);
         })
         .catch(() => {
           document.getElementById('lbList').innerHTML =
             '<div class="state-msg">Could not load leaderboard.</div>';
+          lbInitialized = false; // allow retry on next click if it failed
         });
     }
 
