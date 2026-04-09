@@ -7,12 +7,6 @@
   <link rel="preconnect" href="https://d369cipp2c.execute-api.us-east-1.amazonaws.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- NEW: Preload the font CSS (starts downloading immediately) -->
-  <link rel="preload"
-    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap"
-    as="style" onload="this.onload=null;this.rel='stylesheet'">
-
-  <!-- Fallback link (still needed for browsers that don’t support preload) -->
   <link
     href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap"
     rel="stylesheet">
@@ -56,7 +50,11 @@
       --radius: 4px;
     }
 
-    *,
+    * {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
     *::before,
     *::after {
       box-sizing: border-box;
@@ -76,7 +74,12 @@
       color: var(--ink);
       font-family: Barlow, sans-serif;
       font-weight: 400;
-      min-height: 100vh
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      transform: translateZ(0);
+      /* force GPU layer properly */
     }
 
     header {
@@ -942,7 +945,8 @@
     }
 
     .match-card.new-card {
-      animation: slideUp 0.38s ease both
+      animation: slideUp 0.38s ease both;
+      will-change: transform;
     }
 
     .lb-wrap {
@@ -1084,6 +1088,11 @@
         document.getElementById('matchList').innerHTML = '<div class="state-msg">Could not load data. Check your connection.</div>';
         showToast('Failed to load data', true);
       }
+      setTimeout(() => {
+        document.body.style.display = 'none';
+        document.body.offsetHeight; // force reflow
+        document.body.style.display = '';
+      }, 50);
     }
     // ── SKELETON ───────────────────────────────────────────────────────────────
     function renderSkeleton() {
