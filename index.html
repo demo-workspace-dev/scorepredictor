@@ -1070,74 +1070,21 @@
     let lbInitialized = false;
     let lastLBJson = null;
 
-    // ── CACHE ──────────────────────────────────────────────────────────────────
-    function cachePaint(key) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return null;
-        const p = JSON.parse(raw);
-        if (p && p.data && (Date.now() - p.ts) < CACHE_TTL) return p.data;
-        localStorage.removeItem(key);
-        return null;
-      } catch { localStorage.removeItem(key); return null; }
-    }
-    function cacheSave(key, data) {
-      try {
-        localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
-      } catch { try { localStorage.removeItem(key); } catch { } }
-    }
-
     // ── BOOT ───────────────────────────────────────────────────────────────────
     async function boot() {
-      const pu = cachePaint('wc2026users');
-      const pm = cachePaint('wc2026matches');
-      if (pm && pm[0] && !pm[0].team_home) {
-        ['wc2026users', 'wc2026matches', 'wc2026leaderboard'].forEach(k => localStorage.removeItem(k));
-      }
-
-      const hasValidCache = Array.isArray(pu) && pu.length > 0 && Array.isArray(pm) && pm.length > 0;
-
-      if (hasValidCache) {
-        users = pu; matches = pm; sortUsers();
-        buildMatchDOM();
-      } else {
-        renderSkeleton();
-      }
-
-      let mu, mm;
+      renderSkeleton();
       try {
         const [ru, rm] = await Promise.all([
-          fetch(API + '/users').then(r => { if (!r.ok) throw new Error('users ' + r.status); return r.json(); }),
-          fetch(API + '/matches').then(r => { if (!r.ok) throw new Error('matches ' + r.status); return r.json(); })
+          fetch(API + '/users').then(r => { if (!r.ok) throw new Error(); return r.json(); }),
+          fetch(API + '/matches').then(r => { if (!r.ok) throw new Error(); return r.json(); })
         ]);
-        mu = ru; mm = rm;
-      } catch (err) {
-        console.error('[WC2026] fetch failed:', err);
-        if (!hasValidCache) document.getElementById('matchList').innerHTML = '<div class="state-msg">Could not load data. Check your connection.</div>';
-        showToast('Failed to load data', true);
-        return;
-      }
-
-      mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-      cacheSave('wc2026users', mu);
-      cacheSave('wc2026matches', mm);
-
-      // FIX 1: preserve old matches before overwriting globals
-      const oldMatches = hasValidCache ? matches : [];
-      users = mu; matches = mm; sortUsers();
-
-      try {
-        if (hasValidCache) {
-          patchMatchDOM(oldMatches, mm, mu);
-        } else {
-          buildMatchDOM();
-        }
-      } catch (err) {
-        console.error('[WC2026] render error:', err);
+        users = ru; matches = rm; sortUsers();
         buildMatchDOM();
+      } catch (err) {
+        document.getElementById('matchList').innerHTML = '<div class="state-msg">Could not load data. Check your connection.</div>';
+        showToast('Failed to load data', true);
       }
     }
-
     // ── SKELETON ───────────────────────────────────────────────────────────────
     function renderSkeleton() {
       var cards = Array.from({ length: 5 }, function () {
@@ -1486,9 +1433,6 @@
 
         const oldMatches = matches; // preserve before overwrite
         mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-        cacheSave('wc2026users', mu);
-        cacheSave('wc2026matches', mm);
-        localStorage.removeItem('wc2026leaderboard');
 
         users = mu; matches = mm; sortUsers();
         patchMatchDOM(oldMatches, mm, mu);
