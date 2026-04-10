@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <link rel="preconnect" href="https://d369cipp2c.execute-api.us-east-1.amazonaws.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,23 +50,20 @@
       --radius: 4px;
     }
 
-    * {
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     *::before,
     *::after {
       box-sizing: border-box;
       margin: 0;
-      padding: 0
-    }
-
-    html {
-      scroll-behavior: smooth;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility
+      padding: 0;
     }
 
     body {
@@ -78,15 +75,15 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
-      transform: translateZ(0);
-      /* force GPU layer properly */
     }
 
     header {
       background: var(--ink);
       position: sticky;
       top: 0;
-      z-index: 200
+      z-index: 200;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
     }
 
     .header-top {
@@ -95,13 +92,13 @@
       justify-content: space-between;
       padding: 0 28px;
       height: 60px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08)
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .logo {
       display: flex;
       align-items: baseline;
-      gap: 10px
+      gap: 10px;
     }
 
     .logo-main {
@@ -111,11 +108,11 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: #fff;
-      line-height: 1
+      line-height: 1;
     }
 
     .logo-main span {
-      color: #5ddb7c
+      color: #5ddb7c;
     }
 
     .logo-sub {
@@ -125,7 +122,7 @@
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.5);
-      padding-bottom: 2px
+      padding-bottom: 2px;
     }
 
     .sync-btn {
@@ -143,32 +140,30 @@
       display: flex;
       align-items: center;
       gap: 7px;
-      transition: all 0.2s
+      transition: all 0.2s;
     }
 
     .sync-btn:hover {
       border-color: rgba(255, 255, 255, 0.4);
-      color: #fff
+      color: #fff;
     }
 
     .sync-btn:disabled {
       opacity: 0.3;
-      cursor: not-allowed
+      cursor: not-allowed;
     }
 
     .sync-icon {
       font-size: 0.85rem;
-      display: inline-block
+      display: inline-block;
     }
 
     .sync-btn.spinning .sync-icon {
-      animation: spin 0.7s linear infinite
+      animation: spin 0.7s linear infinite;
     }
 
     @keyframes spin {
-      to {
-        transform: rotate(360deg)
-      }
+      to { transform: rotate(360deg); }
     }
 
     .tabs-wrapper {
@@ -177,7 +172,7 @@
       top: 60px;
       z-index: 199;
       display: flex;
-      padding: 0 28px
+      padding: 0 28px;
     }
 
     .tab {
@@ -191,41 +186,41 @@
       cursor: pointer;
       border-bottom: 2px solid transparent;
       transition: all 0.2s;
-      user-select: none
+      user-select: none;
     }
 
     .tab:hover {
-      color: rgba(255, 255, 255, 0.65)
+      color: rgba(255, 255, 255, 0.65);
     }
 
     .tab.active {
       color: #5ddb7c;
-      border-bottom-color: #5ddb7c
+      border-bottom-color: #5ddb7c;
     }
 
     main {
       max-width: 780px;
       margin: 0 auto;
-      padding: 36px 24px 100px
+      padding: 36px 24px 100px;
     }
 
     .tab-content {
-      display: none
+      display: none;
     }
 
     .tab-content.active {
-      display: block
+      display: block;
     }
 
     .stage-header {
       display: flex;
       align-items: center;
       gap: 16px;
-      margin: 40px 0 16px
+      margin: 40px 0 16px;
     }
 
     .stage-header:first-child {
-      margin-top: 0
+      margin-top: 0;
     }
 
     .stage-label {
@@ -235,13 +230,13 @@
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--ink3);
-      white-space: nowrap
+      white-space: nowrap;
     }
 
     .stage-rule {
       flex: 1;
       height: 1px;
-      background: var(--rule)
+      background: var(--rule);
     }
 
     .match-card {
@@ -253,26 +248,27 @@
       cursor: pointer;
       transition: border-color 0.18s, box-shadow 0.18s;
       -webkit-tap-highlight-color: transparent;
-      user-select: none
+      user-select: none;
+      will-change: border-color, box-shadow;
     }
 
     @media(hover:hover) {
       .match-card:hover {
         border-color: #5ddb7c;
-        box-shadow: 0 0 0 3px rgba(93, 219, 124, 0.13), 0 4px 20px rgba(0, 0, 0, 0.06)
+        box-shadow: 0 0 0 3px rgba(93, 219, 124, 0.13), 0 4px 20px rgba(0, 0, 0, 0.06);
       }
     }
 
     .match-card.open {
       border-color: #5ddb7c;
-      box-shadow: 0 0 0 3px rgba(93, 219, 124, 0.13), 0 4px 20px rgba(0, 0, 0, 0.06)
+      box-shadow: 0 0 0 3px rgba(93, 219, 124, 0.13), 0 4px 20px rgba(0, 0, 0, 0.06);
     }
 
     .match-row {
       display: grid;
       grid-template-columns: 1fr 130px 1fr;
       align-items: stretch;
-      min-height: 72px
+      min-height: 72px;
     }
 
     .team-cell {
@@ -280,17 +276,17 @@
       align-items: center;
       padding: 16px 20px;
       min-width: 0;
-      overflow: hidden
+      overflow: hidden;
     }
 
     .team-cell.home {
       justify-content: flex-end;
-      border-right: 1px solid var(--rule)
+      border-right: 1px solid var(--rule);
     }
 
     .team-cell.away {
       justify-content: flex-start;
-      border-left: 1px solid var(--rule)
+      border-left: 1px solid var(--rule);
     }
 
     .team-name {
@@ -304,11 +300,11 @@
       text-overflow: ellipsis;
       max-width: 100%;
       line-height: 1.1;
-      color: var(--ink)
+      color: var(--ink);
     }
 
     .team-cell.home .team-name {
-      text-align: right
+      text-align: right;
     }
 
     .centre-block {
@@ -319,11 +315,11 @@
       padding: 12px 8px;
       gap: 5px;
       background: var(--paper);
-      transition: background 0.18s
+      transition: background 0.18s;
     }
 
     .match-card.open .centre-block {
-      background: var(--green-light)
+      background: var(--green-light);
     }
 
     .score-display {
@@ -334,37 +330,37 @@
       font-weight: 900;
       font-size: 2rem;
       letter-spacing: -0.02em;
-      line-height: 1
+      line-height: 1;
     }
 
     .score-num {
       color: var(--ink);
       min-width: 26px;
-      text-align: center
+      text-align: center;
     }
 
     .score-num.final {
-      color: var(--green)
+      color: var(--green);
     }
 
     .score-num.pending {
       color: var(--ink3);
       font-size: 1.4rem;
-      font-weight: 400
+      font-weight: 400;
     }
 
     .score-dash {
       color: var(--ink3);
       font-weight: 400;
       font-size: 1.6rem;
-      padding: 0 2px
+      padding: 0 2px;
     }
 
     .match-status {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px
+      gap: 2px;
     }
 
     .badge {
@@ -375,35 +371,28 @@
       border-radius: 2px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      white-space: nowrap
+      white-space: nowrap;
     }
 
     .badge.upcoming {
       background: var(--paper3);
-      color: var(--ink2)
+      color: var(--ink2);
     }
 
     .badge.finished {
       background: var(--green-light);
-      color: var(--green)
+      color: var(--green);
     }
 
     .badge.live {
       background: var(--red-light);
       color: var(--red);
-      animation: blink 1.4s infinite
+      animation: blink 1.4s infinite;
     }
 
     @keyframes blink {
-
-      0%,
-      100% {
-        opacity: 1
-      }
-
-      50% {
-        opacity: 0.5
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     .match-time {
@@ -411,7 +400,7 @@
       font-size: 0.78rem;
       font-weight: 500;
       color: var(--ink3);
-      letter-spacing: 0.03em
+      letter-spacing: 0.03em;
     }
 
     .predictions-panel {
@@ -419,28 +408,29 @@
       grid-template-rows: 0fr;
       transition: grid-template-rows 0.22s ease;
       background: var(--paper);
-      overflow: hidden
+      overflow: hidden;
     }
 
     .predictions-panel-inner {
       overflow: hidden;
       padding: 0 20px;
-      transition: padding 0.22s ease
+      transition: padding 0.22s ease;
     }
 
     .match-card.open .predictions-panel {
       grid-template-rows: 1fr;
-      border-top: 1px solid var(--rule)
+      border-top: 1px solid var(--rule);
     }
 
     .match-card.open .predictions-panel-inner {
-      padding: 14px 20px
+      padding: 14px 20px;
     }
 
     .pred-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 8px
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      justify-items: stretch;
     }
 
     .pred-item {
@@ -451,11 +441,11 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      transition: border-color 0.15s
+      transition: border-color 0.15s;
     }
 
     .pred-item:hover {
-      border-color: var(--rule-strong)
+      border-color: var(--rule-strong);
     }
 
     .pred-name {
@@ -467,13 +457,13 @@
       color: var(--ink2);
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis
+      text-overflow: ellipsis;
     }
 
     .pred-score-row {
       display: flex;
       align-items: center;
-      gap: 6px
+      gap: 6px;
     }
 
     .pred-input {
@@ -489,30 +479,30 @@
       text-align: center;
       outline: none;
       transition: border-color 0.15s, background 0.15s;
-      -moz-appearance: textfield
+      -moz-appearance: textfield;
     }
 
     .pred-input::-webkit-outer-spin-button,
     .pred-input::-webkit-inner-spin-button {
-      -webkit-appearance: none
+      -webkit-appearance: none;
     }
 
     .pred-input:focus {
       border-color: var(--green);
-      background: var(--green-light)
+      background: var(--green-light);
     }
 
     .pred-input:disabled {
       opacity: 0.4;
       cursor: not-allowed;
       background: transparent;
-      border-color: transparent
+      border-color: transparent;
     }
 
     .pred-sep {
       color: var(--ink3);
       font-weight: 600;
-      font-size: 0.9rem
+      font-size: 0.9rem;
     }
 
     .points-pill {
@@ -523,34 +513,19 @@
       border-radius: 2px;
       align-self: flex-start;
       letter-spacing: 0.08em;
-      text-transform: uppercase
+      text-transform: uppercase;
     }
 
-    .points-pill.p3 {
-      background: var(--green-light);
-      color: var(--green)
-    }
-
-    .points-pill.p1 {
-      background: #e8eef8;
-      color: var(--blue)
-    }
-
-    .points-pill.p0 {
-      background: var(--red-light);
-      color: var(--red)
-    }
-
-    .points-pill.pnd {
-      background: var(--paper2);
-      color: var(--ink4)
-    }
+    .points-pill.p3 { background: var(--green-light); color: var(--green); }
+    .points-pill.p1 { background: #e8eef8; color: var(--blue); }
+    .points-pill.p0 { background: var(--red-light); color: var(--red); }
+    .points-pill.pnd { background: var(--paper2); color: var(--ink4); }
 
     .lb-wrap {
       background: #fff;
       border: 1px solid var(--rule);
       border-radius: var(--radius);
-      overflow: hidden
+      overflow: hidden;
     }
 
     .lb-title-row {
@@ -558,7 +533,7 @@
       border-bottom: 2px solid var(--ink);
       display: flex;
       align-items: baseline;
-      gap: 12px
+      gap: 12px;
     }
 
     .lb-title {
@@ -568,14 +543,14 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: var(--ink);
-      line-height: 1
+      line-height: 1;
     }
 
     .lb-sub {
       font-family: "Instrument Serif", serif;
       font-style: italic;
       font-size: 0.85rem;
-      color: var(--ink4)
+      color: var(--ink4);
     }
 
     .lb-header-row {
@@ -589,11 +564,11 @@
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--ink3)
+      color: var(--ink3);
     }
 
     .lb-header-row div:not(:first-child):not(:nth-child(2)) {
-      text-align: center
+      text-align: center;
     }
 
     .lb-row {
@@ -602,62 +577,37 @@
       align-items: center;
       padding: 14px 24px;
       border-bottom: 1px solid var(--rule);
-      transition: background 0.15s
+      transition: background 0.15s;
     }
 
-    .lb-row:last-child {
-      border-bottom: none
-    }
-
-    .lb-row:hover {
-      background: var(--paper)
-    }
-
-    .lb-row.top1 {
-      background: var(--gold-light)
-    }
-
-    .lb-row.top1:hover {
-      background: #fdf2d0
-    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:hover { background: var(--paper); }
+    .lb-row.top1 { background: var(--gold-light); }
+    .lb-row.top1:hover { background: #fdf2d0; }
 
     .rank-cell {
       display: flex;
       align-items: center;
-      justify-content: center
+      justify-content: center;
     }
 
     .rank-num {
       font-family: "Barlow Condensed", sans-serif;
       font-weight: 900;
       font-size: 1.4rem;
-      line-height: 1
+      line-height: 1;
     }
 
-    .rank-num.r1 {
-      color: var(--gold);
-      font-size: 1.6rem
-    }
-
-    .rank-num.r2 {
-      color: var(--ink2)
-    }
-
-    .rank-num.r3 {
-      color: #a0522d
-    }
-
-    .rank-num.rn {
-      color: var(--ink3);
-      font-size: 0.9rem;
-      font-weight: 700
-    }
+    .rank-num.r1 { color: var(--gold); font-size: 1.6rem; }
+    .rank-num.r2 { color: var(--ink2); }
+    .rank-num.r3 { color: #a0522d; }
+    .rank-num.rn { color: var(--ink3); font-size: 0.9rem; font-weight: 700; }
 
     .lb-name-cell {
       display: flex;
       flex-direction: column;
       gap: 1px;
-      min-width: 0
+      min-width: 0;
     }
 
     .lb-name {
@@ -669,12 +619,10 @@
       color: var(--ink);
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis
+      text-overflow: ellipsis;
     }
 
-    .lb-row.top1 .lb-name {
-      color: var(--gold)
-    }
+    .lb-row.top1 .lb-name { color: var(--gold); }
 
     .lb-pts {
       font-family: "Barlow Condensed", sans-serif;
@@ -682,7 +630,7 @@
       font-size: 1.5rem;
       color: var(--green);
       text-align: center;
-      line-height: 1
+      line-height: 1;
     }
 
     .lb-num {
@@ -690,24 +638,19 @@
       font-size: 1rem;
       font-weight: 600;
       text-align: center;
-      color: var(--ink2)
+      color: var(--ink2);
     }
 
     @keyframes shimmer {
-      0% {
-        background-position: -1000px 0
-      }
-
-      100% {
-        background-position: 1000px 0
-      }
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
     }
 
     .skel {
       background: linear-gradient(90deg, var(--paper2) 25%, var(--paper3) 50%, var(--paper2) 75%);
       background-size: 1000px 100%;
       animation: shimmer 1.8s infinite linear;
-      border-radius: 3px
+      border-radius: 3px;
     }
 
     .skel-card {
@@ -720,25 +663,12 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      min-height: 72px
+      min-height: 72px;
     }
 
-    .sk-team {
-      height: 16px;
-      width: 100px
-    }
-
-    .sk-score {
-      height: 40px;
-      width: 100px;
-      border-radius: 3px
-    }
-
-    .sk-meta {
-      height: 10px;
-      width: 70px;
-      margin-top: 6px
-    }
+    .sk-team { height: 16px; width: 100px; }
+    .sk-score { height: 40px; width: 100px; border-radius: 3px; }
+    .sk-meta { height: 10px; width: 70px; margin-top: 6px; }
 
     .sk-lb-row {
       display: grid;
@@ -746,31 +676,13 @@
       align-items: center;
       padding: 14px 24px;
       gap: 8px;
-      border-bottom: 1px solid var(--rule)
+      border-bottom: 1px solid var(--rule);
     }
 
-    .sk-rank {
-      height: 22px;
-      width: 28px;
-      margin: 0 auto
-    }
-
-    .sk-name {
-      height: 16px;
-      width: 140px
-    }
-
-    .sk-pts {
-      height: 22px;
-      width: 44px;
-      margin: 0 auto
-    }
-
-    .sk-stat {
-      height: 14px;
-      width: 28px;
-      margin: 0 auto
-    }
+    .sk-rank { height: 22px; width: 28px; margin: 0 auto; }
+    .sk-name { height: 16px; width: 140px; }
+    .sk-pts { height: 22px; width: 44px; margin: 0 auto; }
+    .sk-stat { height: 14px; width: 28px; margin: 0 auto; }
 
     .state-msg {
       text-align: center;
@@ -778,7 +690,7 @@
       padding: 60px 20px;
       font-family: "Instrument Serif", serif;
       font-style: italic;
-      font-size: 1rem
+      font-size: 1rem;
     }
 
     .toast {
@@ -799,24 +711,18 @@
       opacity: 0;
       transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
       z-index: 999;
-      white-space: nowrap
+      white-space: nowrap;
     }
 
-    .toast.error {
-      border-left-color: var(--red)
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0)
-    }
+    .toast.error { border-left-color: var(--red); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     .rules-box {
       margin-top: 12px;
       background: #fff;
       border: 1px solid var(--rule);
       border-radius: var(--radius);
-      padding: 20px 24px 22px
+      padding: 20px 24px 22px;
     }
 
     .rules-title {
@@ -826,13 +732,13 @@
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--ink3);
-      margin-bottom: 12px
+      margin-bottom: 12px;
     }
 
     .rules-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 4px
+      margin-bottom: 4px;
     }
 
     .rules-table thead th {
@@ -844,13 +750,10 @@
       color: var(--ink4);
       padding: 0 0 6px;
       text-align: left;
-      border-bottom: 1px solid var(--rule)
+      border-bottom: 1px solid var(--rule);
     }
 
-    .rules-table thead th.pts-col {
-      text-align: center;
-      width: 64px
-    }
+    .rules-table thead th.pts-col { text-align: center; width: 64px; }
 
     .rules-table tbody td {
       font-family: Barlow, sans-serif;
@@ -858,44 +761,16 @@
       font-weight: 400;
       color: var(--ink2);
       padding: 8px 0;
-      border-bottom: 1px solid var(--rule)
+      border-bottom: 1px solid var(--rule);
     }
 
-    .rules-table tbody tr:last-child td {
-      border-bottom: none
-    }
+    .rules-table tbody tr:last-child td { border-bottom: none; }
+    .pts-col { text-align: center; width: 64px; }
+    .green-pts { font-family: "Barlow Condensed", sans-serif; font-weight: 800; color: var(--green); font-size: 1rem; }
+    .blue-pts { font-family: "Barlow Condensed", sans-serif; font-weight: 800; color: var(--blue); font-size: 1rem; }
+    .grey-pts { font-family: "Barlow Condensed", sans-serif; font-weight: 800; color: var(--ink4); font-size: 1rem; }
 
-    .pts-col {
-      text-align: center;
-      width: 64px
-    }
-
-    .green-pts {
-      font-family: "Barlow Condensed", sans-serif;
-      font-weight: 800;
-      color: var(--green);
-      font-size: 1rem
-    }
-
-    .blue-pts {
-      font-family: "Barlow Condensed", sans-serif;
-      font-weight: 800;
-      color: var(--blue);
-      font-size: 1rem
-    }
-
-    .grey-pts {
-      font-family: "Barlow Condensed", sans-serif;
-      font-weight: 800;
-      color: var(--ink4);
-      font-size: 1rem
-    }
-
-    .rules-divider {
-      height: 1px;
-      background: var(--rule);
-      margin: 14px 0
-    }
+    .rules-divider { height: 1px; background: var(--rule); margin: 14px 0; }
 
     .rules-sub {
       font-family: "Barlow Condensed", sans-serif;
@@ -904,44 +779,34 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--ink3);
-      margin-bottom: 8px
+      margin-bottom: 8px;
     }
 
     .rules-list {
       padding-left: 18px;
       display: flex;
       flex-direction: column;
-      gap: 5px
+      gap: 5px;
     }
 
     .rules-list li {
       font-family: Barlow, sans-serif;
       font-size: 0.88rem;
-      color: var(--ink2)
+      color: var(--ink2);
     }
 
     .rules-list-item {
       font-family: Barlow, sans-serif;
       font-size: 0.88rem;
       color: var(--ink2);
-      line-height: 1.5
+      line-height: 1.5;
     }
 
-    .rules-list-item strong {
-      font-weight: 600;
-      color: var(--ink)
-    }
+    .rules-list-item strong { font-weight: 600; color: var(--ink); }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(14px)
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0)
-      }
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .match-card.new-card {
@@ -949,84 +814,25 @@
       will-change: transform;
     }
 
-    .lb-wrap {
-      animation: slideUp 0.35s ease both
-    }
+    .lb-wrap { animation: slideUp 0.35s ease both; }
 
     @media(max-width:560px) {
-      .header-top {
-        padding: 0 16px;
-        height: 54px;
-      }
-
-      .logo-main {
-        font-size: 1.2rem;
-      }
-
-      .logo-sub {
-        font-size: 0.85rem;
-        /* ← also increased for mobile */
-      }
-
-      .tabs-wrapper {
-        padding: 0 16px;
-        top: 54px;
-      }
-
-      .tab {
-        padding: 11px 14px 9px;
-        font-size: 0.88rem;
-        /* ← increased for mobile */
-      }
-
-      main {
-        padding: 24px 14px 100px;
-      }
-
-      .team-name {
-        font-size: 0.9rem;
-        max-width: 100%;
-      }
-
-      .team-cell {
-        padding: 12px 12px;
-      }
-
-      .match-row {
-        grid-template-columns: 1fr 106px 1fr;
-      }
-
-      .centre-block {
-        min-width: 0;
-        padding: 10px 6px;
-      }
-
-      .score-display {
-        font-size: 1.6rem;
-      }
-
-      .lb-header-row,
-      .lb-row {
-        grid-template-columns: 44px 1fr 64px 44px 48px;
-        padding: 12px 14px;
-      }
-
-      .lb-pts {
-        font-size: 1.2rem;
-      }
-
-      .lb-name {
-        font-size: 0.9rem;
-      }
-
-      .sk-lb-row {
-        grid-template-columns: 44px 1fr 64px 44px 48px;
-        padding: 12px 14px;
-      }
-
-      .pred-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      .header-top { padding: 0 16px; height: 54px; }
+      .logo-main { font-size: 1.2rem; }
+      .logo-sub { font-size: 0.85rem; }
+      .tabs-wrapper { padding: 0 16px; top: 54px; }
+      .tab { padding: 11px 14px 9px; font-size: 0.88rem; }
+      main { padding: 24px 14px 100px; }
+      .team-name { font-size: 0.9rem; max-width: 100%; }
+      .team-cell { padding: 12px 12px; }
+      .match-row { grid-template-columns: 1fr 106px 1fr; }
+      .centre-block { min-width: 0; padding: 10px 6px; }
+      .score-display { font-size: 1.6rem; }
+      .lb-header-row, .lb-row { grid-template-columns: 44px 1fr 64px 44px 48px; padding: 12px 14px; }
+      .lb-pts { font-size: 1.2rem; }
+      .lb-name { font-size: 0.9rem; }
+      .sk-lb-row { grid-template-columns: 44px 1fr 64px 44px 48px; padding: 12px 14px; }
+      .pred-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -1063,14 +869,86 @@
   <div class="toast" id="toast"></div>
 
   <script>
+    // ── RENDERING SHARPNESS FIX ────────────────────────────────────────────────
+    (function () {
+      function fixDPR() {
+        const dpr = window.devicePixelRatio || 1;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const backingRatio = ctx.webkitBackingStorePixelRatio ||
+          ctx.mozBackingStorePixelRatio ||
+          ctx.msBackingStorePixelRatio ||
+          ctx.oBackingStorePixelRatio ||
+          ctx.backingStorePixelRatio || 1;
+        window._sharpRatio = dpr / backingRatio;
+      }
+
+      function forceRepaint() {
+        const scrollY = window.scrollY;
+        window.scrollTo(0, scrollY + 1);
+        requestAnimationFrame(function () {
+          window.scrollTo(0, scrollY);
+        });
+      }
+
+      function sharpnessGuard() {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            forceRepaint();
+          });
+        });
+      }
+
+      let lastDPR = window.devicePixelRatio;
+      function onDPRChange() {
+        const currentDPR = window.devicePixelRatio;
+        if (currentDPR !== lastDPR) {
+          lastDPR = currentDPR;
+          forceRepaint();
+        }
+        const mqString = '(resolution: ' + currentDPR + 'dppx)';
+        const mq = window.matchMedia(mqString);
+        mq.addEventListener('change', onDPRChange, { once: true });
+      }
+
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) sharpnessGuard();
+      });
+
+      window.addEventListener('focus', sharpnessGuard);
+
+      let resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sharpnessGuard, 150);
+      });
+
+      fixDPR();
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+          sharpnessGuard();
+          onDPRChange();
+        });
+      } else {
+        sharpnessGuard();
+        onDPRChange();
+      }
+
+      window.addEventListener('load', function () {
+        sharpnessGuard();
+      });
+    })();
+
+    // ── APP ────────────────────────────────────────────────────────────────────
     const API = 'https://nowhere-admission-draft-adapters.trycloudflare.com';
-    <!-- To use lambda use the url 'https://d369cipp2c.execute-api.us-east-1.amazonaws.com' -->
+    // To use lambda use the url 'https://d369cipp2c.execute-api.us-east-1.amazonaws.com'
     const STAGE_LABEL = { group: 'Group Stage', r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter Finals', sf: 'Semi Finals', third: 'Third Place', final: 'Final' };
     const predBuffer = {};
     const timers = {};
     let matches = [], users = [];
     let toastTimer;
-    const CACHE_TTL = 45 * 1000;
     let lbInitialized = false;
     let lastLBJson = null;
 
@@ -1088,12 +966,8 @@
         document.getElementById('matchList').innerHTML = '<div class="state-msg">Could not load data. Check your connection.</div>';
         showToast('Failed to load data', true);
       }
-      setTimeout(() => {
-        document.body.style.display = 'none';
-        document.body.offsetHeight; // force reflow
-        document.body.style.display = '';
-      }, 50);
     }
+
     // ── SKELETON ───────────────────────────────────────────────────────────────
     function renderSkeleton() {
       var cards = Array.from({ length: 5 }, function () {
@@ -1120,16 +994,20 @@
       var d = new Date(s);
       return isNaN(d.getTime()) ? null : d;
     }
+
     function fmtDate(dt) {
       return dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
     }
+
     function fmtTime(dt) {
       return dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).toUpperCase() + ' IST';
     }
+
     function escHtml(s) {
       if (!s) return '';
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
+
     function getMatchMeta(m) {
       var finished = m.status === 'FINISHED';
       var kickoffDt = parseUTC(m.kickoff);
@@ -1145,7 +1023,7 @@
       };
     }
 
-    // ── BUILD PRED ITEM HTML ───────────────────────────────────────────────────
+    // ── PRED ITEM HTML ─────────────────────────────────────────────────────────
     function buildPredItemHTML(u, matchid, pred, finished, locked) {
       var ph = (pred != null && pred.pred_home !== undefined) ? pred.pred_home : '';
       var pa = (pred != null && pred.pred_away !== undefined) ? pred.pred_away : '';
@@ -1175,16 +1053,43 @@
         '</div>';
     }
 
-    // ── BUILD FULL CARD HTML ───────────────────────────────────────────────────
+    function buildPredSentence(m, users) {
+      var predicted = [];
+      users.forEach(function (u) {
+        var pred = m.predictions ? m.predictions[u.user_id] : null;
+        if (pred && pred.pred_home !== undefined && pred.pred_away !== undefined) {
+          predicted.push((u.display_name || '').split(' ')[0]);
+        }
+      });
+      if (!predicted.length) return '<span style="color:var(--ink4)">No predictions yet</span>';
+      var predStr = predicted.length > 3
+        ? predicted.slice(0, 2).join(', ') + ' &amp; ' + (predicted.length - 2) + ' others'
+        : predicted.join(', ');
+      return '<span style="font-weight:800;color:var(--green)">' + predStr + '</span> predicted';
+    }
+
+    // ── ALIGN LAST ROW (pyramid centering) ────────────────────────────────────
+    function alignLastPredRow(grid) {
+      const items = grid.querySelectorAll('.pred-item');
+      const cols = 5;
+      const remainder = items.length % cols;
+      if (remainder === 0) return;
+      const offset = Math.floor((cols - remainder) / 2) + 1;
+      for (let i = items.length - remainder; i < items.length; i++) {
+        items[i].style.gridColumnStart = (offset + (i - (items.length - remainder)));
+      }
+    }
+
+    // ── BUILD CARD HTML ────────────────────────────────────────────────────────
     function buildCardHTML(m) {
       var meta = getMatchMeta(m);
       var homeTeam = m.team_home || 'TBD';
       var awayTeam = m.team_away || 'TBD';
       var sh = meta.finished
-        ? '<span class="score-num final" data-role="sh">' + ((m.score_home !== undefined && m.score_home !== null ? m.score_home : '')) + '</span>'
+        ? '<span class="score-num final" data-role="sh">' + (m.score_home !== undefined && m.score_home !== null ? m.score_home : '') + '</span>'
         : '<span class="score-num pending" data-role="sh">–</span>';
       var sa = meta.finished
-        ? '<span class="score-num final" data-role="sa">' + ((m.score_away !== undefined && m.score_away !== null ? m.score_away : '')) + '</span>'
+        ? '<span class="score-num final" data-role="sa">' + (m.score_away !== undefined && m.score_away !== null ? m.score_away : '') + '</span>'
         : '<span class="score-num pending" data-role="sa">–</span>';
       var predsHtml = '';
       if (users.length) {
@@ -1205,11 +1110,13 @@
         '<div class="match-status">' +
         '<div class="badge ' + meta.badgeCls + '" data-role="badge">' + meta.badgeTxt + '</div>' +
         '<div class="match-time" data-role="time">' + meta.timeStr + '</div>' +
-        '</div>' +
-        '</div>' +
+        '</div></div>' +
         '<div class="team-cell away"><span class="team-name">' + escHtml(awayTeam) + '</span></div>' +
         '</div>' +
         '<div class="predictions-panel"><div class="predictions-panel-inner">' + predsHtml + '</div></div>' +
+        '<div class="pred-sentence" data-matchid="' + escHtml(m.match_id) + '" style="padding:7px 16px 8px;border-top:1px solid var(--rule);background:var(--paper);font-family:\'Barlow Condensed\',sans-serif;font-size:0.82rem;letter-spacing:0.01em;color:var(--ink4);">' +
+        buildPredSentence(m, users) +
+        '</div>' +
         '</div>';
     }
 
@@ -1228,9 +1135,10 @@
         html += buildCardHTML(m);
       });
       container.innerHTML = html;
+      container.querySelectorAll('.pred-grid').forEach(alignLastPredRow);
     }
 
-    // ── FIXED patchMatchDOM (Problem 1 solved) ─────────────────────────────────
+    // ── PATCH DOM ──────────────────────────────────────────────────────────────
     function patchMatchDOM(oldMatches, newMatches, newUsers) {
       const container = document.getElementById('matchList');
       if (!container) return;
@@ -1242,7 +1150,6 @@
 
         const meta = getMatchMeta(nm);
 
-        // Patch team names, scores, badge, time
         const homeEl = card.querySelector('.team-cell.home .team-name');
         const awayEl = card.querySelector('.team-cell.away .team-name');
         if (homeEl) homeEl.textContent = nm.team_home || 'TBD';
@@ -1250,30 +1157,23 @@
 
         const sh = card.querySelector('[data-role="sh"]');
         const sa = card.querySelector('[data-role="sa"]');
-        if (sh && meta.finished) {
-          sh.className = 'score-num final';
-          sh.textContent = (nm.score_home !== undefined && nm.score_home !== null ? nm.score_home : '');
-        }
-        if (sa && meta.finished) {
-          sa.className = 'score-num final';
-          sa.textContent = (nm.score_away !== undefined && nm.score_away !== null ? nm.score_away : '');
-        }
+        if (sh && meta.finished) { sh.className = 'score-num final'; sh.textContent = (nm.score_home !== undefined && nm.score_home !== null ? nm.score_home : ''); }
+        if (sa && meta.finished) { sa.className = 'score-num final'; sa.textContent = (nm.score_away !== undefined && nm.score_away !== null ? nm.score_away : ''); }
 
         const badge = card.querySelector('[data-role="badge"]');
-        if (badge) {
-          badge.className = 'badge ' + meta.badgeCls;
-          badge.textContent = meta.badgeTxt;
-        }
+        if (badge) { badge.className = 'badge ' + meta.badgeCls; badge.textContent = meta.badgeTxt; }
+
+        const sentenceEl = container.querySelector('.pred-sentence[data-matchid="' + nm.match_id + '"]');
+        if (sentenceEl) sentenceEl.innerHTML = buildPredSentence(nm, newUsers);
+
         const timeEl = card.querySelector('[data-role="time"]');
         if (timeEl) timeEl.textContent = meta.timeStr;
 
-        // FIXED: always update every prediction (no early return using oldM)
         newUsers.forEach(function (u) {
           const pred = nm.predictions ? nm.predictions[u.user_id] : null;
           const predItem = card.querySelector('.pred-item[data-userid="' + u.user_id + '"]');
           if (!predItem) return;
 
-          // Update points pill
           const pill = predItem.querySelector('[data-role="pill"]');
           if (pill) {
             let cls = 'pnd', txt = 'Pending';
@@ -1287,7 +1187,6 @@
             pill.textContent = txt;
           }
 
-          // Update inputs (skip only if currently typing)
           const inHome = predItem.querySelector('[data-role="input-home"]');
           const inAway = predItem.querySelector('[data-role="input-away"]');
           if (inHome && inHome !== activeEl && pred && pred.pred_home !== undefined) inHome.value = pred.pred_home;
@@ -1296,6 +1195,8 @@
           if (inAway) inAway.disabled = meta.locked;
         });
       });
+
+      document.querySelectorAll('.pred-grid').forEach(alignLastPredRow);
     }
 
     function toggleCard(card) { card.classList.toggle('open'); }
@@ -1309,12 +1210,9 @@
       if (id === 'leaderboard') renderLeaderboard();
     }
 
-    // ── FIXED LEADERBOARD (Problem 2 solved) ───────────────────────────────────
+    // ── LEADERBOARD ────────────────────────────────────────────────────────────
     function renderLBData(data) {
-      if (!data.length) {
-        document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>';
-        return;
-      }
+      if (!data.length) { document.getElementById('lbList').innerHTML = '<div class="state-msg">No players yet.</div>'; return; }
 
       data.sort(function (a, b) {
         if (b.total_points !== a.total_points) return b.total_points - a.total_points;
@@ -1322,18 +1220,16 @@
         return (a.display_name || '').localeCompare(b.display_name || '');
       });
 
+      const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
       let html = '<div class="lb-wrap">' +
         '<div class="lb-title-row"><div class="lb-title">Standings</div>' +
         '<div class="lb-sub">' + data.length + ' player' + (data.length !== 1 ? 's' : '') + ' competing since 2018</div></div>' +
         '<div class="lb-header-row"><div></div><div>Player</div><div>Pts</div><div>Exact</div><div>Result</div></div>';
 
-      const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
-
       data.forEach(function (u, i) {
         const rowcls = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
         const rcls = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : 'rn';
         const rankDisplay = i < 3 ? medals[i] : (i + 1);
-
         html += '<div class="lb-row ' + rowcls + '">' +
           '<div class="rank-cell"><span class="rank-num ' + rcls + '">' + rankDisplay + '</span></div>' +
           '<div class="lb-name-cell"><div class="lb-name">' + escHtml(u.display_name) + '</div></div>' +
@@ -1363,7 +1259,7 @@
     }
 
     function renderLeaderboard() {
-      if (lbInitialized) return; // already rendered, let polls handle updates
+      if (lbInitialized) return;
       lbInitialized = true;
       renderLBSkeleton();
       fetch(API + '/leaderboard')
@@ -1374,9 +1270,8 @@
           renderLBData(data);
         })
         .catch(() => {
-          document.getElementById('lbList').innerHTML =
-            '<div class="state-msg">Could not load leaderboard.</div>';
-          lbInitialized = false; // allow retry on next click if it failed
+          document.getElementById('lbList').innerHTML = '<div class="state-msg">Could not load leaderboard.</div>';
+          lbInitialized = false;
         });
     }
 
@@ -1418,10 +1313,10 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: userId, match_id: parseInt(matchId, 10), pred_home: buf.home, pred_away: buf.away })
-        }).then(function (r) { return r.json(); }).then(function (d) {
+        }).then(r => r.json()).then(d => {
           if (d.status === 'saved') showToast('Saved ✓');
           else showToast(d.error || 'Error saving', true);
-        }).catch(function () { showToast('Network error', true); });
+        }).catch(() => showToast('Network error', true));
       }, 500);
     }
 
@@ -1432,20 +1327,15 @@
       btn.disabled = true; btn.classList.add('spinning');
       if (lbl) lbl.textContent = 'Syncing…';
       try {
-        var data = await fetch(API + '/sync', { method: 'POST' }).then(function (r) { return r.json(); });
+        var data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
         showToast('Synced ' + data.count + ' match' + (data.count !== 1 ? 'es' : ''));
-
         const [mu, mm] = await Promise.all([
           fetch(API + '/users').then(r => r.json()),
           fetch(API + '/matches').then(r => r.json())
         ]);
-
-        const oldMatches = matches; // preserve before overwrite
-        mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
-
+        const oldMatches = matches;
         users = mu; matches = mm; sortUsers();
         patchMatchDOM(oldMatches, mm, mu);
-
         if (document.getElementById('leaderboard').classList.contains('active')) renderLeaderboard();
       } catch (e) {
         console.error('[WC2026] sync failed:', e);
@@ -1465,7 +1355,7 @@
       toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
     }
 
-    // ── POLL LOGIC (now fully updated) ─────────────────────────────────────────
+    // ── POLL ───────────────────────────────────────────────────────────────────
     async function doPoll() {
       if (document.hidden || (document.activeElement && document.activeElement.classList.contains('pred-input'))) return;
       try {
@@ -1474,17 +1364,14 @@
           fetch(API + '/matches').then(r => r.ok ? r.json() : null).catch(() => null)
         ]);
         if (!mu || !mm || !Array.isArray(mu) || !Array.isArray(mm)) return;
-
-        const oldMatches = matches; // preserve for patch
-        mu.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+        const oldMatches = matches;
         users = mu; matches = mm; sortUsers();
         patchMatchDOM(oldMatches, mm, mu);
-
         if (document.getElementById('leaderboard').classList.contains('active')) {
           fetch(API + '/leaderboard').then(r => r.json()).then(data => {
             if (!Array.isArray(data)) return;
             const json = JSON.stringify(data);
-            if (json === lastLBJson) return; // data unchanged, skip re-render
+            if (json === lastLBJson) return;
             lastLBJson = json;
             renderLBData(data);
           }).catch(() => { });
@@ -1500,26 +1387,25 @@
       if (fastPoll) return;
       fastPoll = setInterval(doPoll, 30 * 1000);
     }
+
     function switchToSlowPoll() {
       if (fastPoll) { clearInterval(fastPoll); fastPoll = null; }
       slowPoll = setInterval(doPoll, 2 * 60 * 1000);
     }
+
     function resetIdleTimer() {
       clearTimeout(idleTimeout);
       if (slowPoll) { clearInterval(slowPoll); slowPoll = null; startFastPoll(); }
       idleTimeout = setTimeout(switchToSlowPoll, 30 * 60 * 1000);
     }
 
-    // Start everything
     boot();
 
-    // Start polling 3 seconds after boot
     setTimeout(function () {
       startFastPoll();
       resetIdleTimer();
     }, 3000);
 
-    // Pause/resume on tab visibility
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
         clearInterval(fastPoll); fastPoll = null;
@@ -1531,7 +1417,6 @@
       }
     });
 
-    // Any click or keypress resets idle timer
     document.addEventListener('click', resetIdleTimer);
     document.addEventListener('keydown', resetIdleTimer);
   </script>
