@@ -48,10 +48,11 @@
       --rule: rgba(14, 14, 14, 0.12);
       --rule-strong: rgba(14, 14, 14, 0.25);
       --radius: 4px;
+      /* Mobile scroll performance */
+      --scroll-behavior: smooth;
     }
 
     html {
-      scroll-behavior: smooth;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
@@ -77,6 +78,14 @@
       text-rendering: optimizeLegibility;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
+      /* Critical mobile fixes */
+      scroll-behavior: var(--scroll-behavior);
+      -webkit-overflow-scrolling: touch;
+      /* already there, keeping it */
+      overscroll-behavior-y: contain;
+      /* keeps the clean app feel */
+      touch-action: pan-y;
+      /* added here too for safety */
     }
 
     header {
@@ -1072,76 +1081,20 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ── RENDERING SHARPNESS FIX ────────────────────────────────────────────────
+    // ── RENDERING SHARPNESS FIX (mobile-friendly) ───────────────────────────────
+    // Removed the aggressive scrollTo hacks that were killing mobile momentum
+    // Only keep the absolute minimum needed for high-DPR text rendering
     (function () {
       function fixDPR() {
         const dpr = window.devicePixelRatio || 1;
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        const backingRatio = ctx.webkitBackingStorePixelRatio ||
-          ctx.mozBackingStorePixelRatio ||
-          ctx.msBackingStorePixelRatio ||
-          ctx.oBackingStorePixelRatio ||
-          ctx.backingStorePixelRatio || 1;
+        const backingRatio = ctx.backingStorePixelRatio || 1;
         window._sharpRatio = dpr / backingRatio;
       }
 
-      function forceRepaint() {
-        const scrollY = window.scrollY;
-        window.scrollTo(0, scrollY + 1);
-        requestAnimationFrame(function () {
-          window.scrollTo(0, scrollY);
-        });
-      }
-
-      function sharpnessGuard() {
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            forceRepaint();
-          });
-        });
-      }
-
-      let lastDPR = window.devicePixelRatio;
-      function onDPRChange() {
-        const currentDPR = window.devicePixelRatio;
-        if (currentDPR !== lastDPR) {
-          lastDPR = currentDPR;
-          forceRepaint();
-        }
-        const mqString = '(resolution: ' + currentDPR + 'dppx)';
-        const mq = window.matchMedia(mqString);
-        mq.addEventListener('change', onDPRChange, { once: true });
-      }
-
-      document.addEventListener('visibilitychange', function () {
-        if (!document.hidden) sharpnessGuard();
-      });
-
-      window.addEventListener('focus', sharpnessGuard);
-
-      let resizeTimer;
-      window.addEventListener('resize', function () {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(sharpnessGuard, 150);
-      });
-
       fixDPR();
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-          sharpnessGuard();
-          onDPRChange();
-        });
-      } else {
-        sharpnessGuard();
-        onDPRChange();
-      }
-
-      window.addEventListener('load', function () {
-        sharpnessGuard();
-      });
     })();
 
     // ── APP ────────────────────────────────────────────────────────────────────
