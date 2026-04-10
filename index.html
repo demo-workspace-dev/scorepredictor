@@ -81,10 +81,6 @@
 
     header {
       background: var(--ink);
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      will-change: transform;
     }
 
     .header-top {
@@ -171,11 +167,17 @@
 
     .tabs-wrapper {
       background: var(--ink);
-      position: sticky;
-      top: 60px;
-      z-index: 199;
       display: flex;
       padding: 0 28px;
+    }
+
+    .sticky-shell {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      transform: translateZ(0);
+      /* promote to own GPU layer — OK here since it's ONE element */
+      backface-visibility: hidden;
     }
 
     .tab {
@@ -967,11 +969,6 @@
         font-size: 0.85rem;
       }
 
-      .tabs-wrapper {
-        padding: 0 16px;
-        top: 54px;
-      }
-
       .tab {
         padding: 11px 14px 9px;
         font-size: 0.88rem;
@@ -1042,22 +1039,24 @@
 </head>
 
 <body>
-  <header>
-    <div class="header-top">
-      <div class="logo">
-        <div class="logo-main">WC<span>2026</span></div>
-        <div class="logo-sub">Predictor</div>
+  <div class="sticky-shell">
+    <header>
+      <div class="header-top">
+        <div class="logo">
+          <div class="logo-main">WC<span>2026</span></div>
+          <div class="logo-sub">Predictor</div>
+        </div>
+        <button class="sync-btn" id="syncBtn" onclick="syncAll()">
+          <span class="sync-icon">&#x21BB;</span>
+          <span class="btn-label">Sync Scores</span>
+        </button>
       </div>
-      <button class="sync-btn" id="syncBtn" onclick="syncAll()">
-        <span class="sync-icon">&#x21BB;</span>
-        <span class="btn-label">Sync Scores</span>
-      </button>
-    </div>
+    </header>
     <div class="tabs-wrapper">
       <div class="tab active" onclick="switchTab('predict',this)">Predict</div>
       <div class="tab" onclick="switchTab('leaderboard',this)">Leaderboard</div>
     </div>
-  </header>
+  </div>
   <main>
     <div id="predict" class="tab-content active">
       <div id="matchList">
