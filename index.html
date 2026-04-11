@@ -1091,7 +1091,7 @@
       if (!teamName) return '';
       const code = TEAM_FLAG[teamName.trim().toLowerCase()];
       if (!code) return '';
-      return `<img src="flags/${code}.png" width="24" height="16" style="border-radius:2px;flex-shrink:0;display:block;" alt="${teamName}">`;
+      return `<img src="flags/${code}.png" width="24" height="16" style="border-radius:2px;flex-shrink:0;display:block;border:1px solid rgba(0,0,0,0.1);" alt="${teamName}">`;
     }
     // ── APP ────────────────────────────────────────────────────────────────────
     const API = 'https://nowhere-admission-draft-adapters.trycloudflare.com';
