@@ -1833,7 +1833,7 @@
       var btn = document.getElementById('syncBtn');
       var lbl = btn.querySelector('.btn-label');
       btn.disabled = true; btn.classList.add('spinning');
-      if (lbl) lbl.textContent = 'Syncing…';
+      if (lbl) lbl.textContent = 'Refreshing…';
       try {
         var data = await fetch(API + '/sync', { method: 'POST' }).then(r => r.json());
         showToast('Synced ' + data.count + ' match' + (data.count !== 1 ? 'es' : ''));
@@ -1850,7 +1850,7 @@
         showToast('Sync failed', true);
       } finally {
         btn.disabled = false; btn.classList.remove('spinning');
-        if (lbl) lbl.textContent = 'Sync Scores';
+        if (lbl) lbl.textContent = 'Update Scores';
       }
     }
 
