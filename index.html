@@ -48,8 +48,6 @@
       --rule: rgba(14, 14, 14, 0.12);
       --rule-strong: rgba(14, 14, 14, 0.25);
       --radius: 4px;
-      /* Mobile scroll performance */
-      --scroll-behavior: smooth;
     }
 
     html {
@@ -78,14 +76,6 @@
       text-rendering: optimizeLegibility;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
-      /* Critical mobile fixes */
-      scroll-behavior: var(--scroll-behavior);
-      -webkit-overflow-scrolling: touch;
-      /* already there, keeping it */
-      overscroll-behavior-y: contain;
-      /* keeps the clean app feel */
-      touch-action: pan-y;
-      /* added here too for safety */
     }
 
     header {
@@ -184,9 +174,7 @@
       position: sticky;
       top: 0;
       z-index: 200;
-      transform: translateZ(0);
-      /* promote to own GPU layer — OK here since it's ONE element */
-      backface-visibility: hidden;
+      will-change: transform;
     }
 
     .tab {
@@ -216,7 +204,6 @@
       max-width: 780px;
       margin: 0 auto;
       padding: 36px 24px 100px;
-      touch-action: pan-y;
     }
 
     .tab-content {
@@ -1081,22 +1068,6 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ── RENDERING SHARPNESS FIX (mobile-friendly) ───────────────────────────────
-    // Removed the aggressive scrollTo hacks that were killing mobile momentum
-    // Only keep the absolute minimum needed for high-DPR text rendering
-    (function () {
-      function fixDPR() {
-        const dpr = window.devicePixelRatio || 1;
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        const backingRatio = ctx.backingStorePixelRatio || 1;
-        window._sharpRatio = dpr / backingRatio;
-      }
-
-      fixDPR();
-    })();
-
     // ── APP ────────────────────────────────────────────────────────────────────
     const API = 'https://nowhere-admission-draft-adapters.trycloudflare.com';
     // To use lambda use the url 'https://d369cipp2c.execute-api.us-east-1.amazonaws.com'
