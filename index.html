@@ -1068,6 +1068,31 @@
   <div class="toast" id="toast"></div>
 
   <script>
+    const TEAM_FLAG = Object.fromEntries(Object.entries({
+      'United States': 'us', 'Canada': 'ca', 'Mexico': 'mx',
+      'Argentina': 'ar', 'Brazil': 'br', 'Colombia': 'co',
+      'Ecuador': 'ec', 'Paraguay': 'py', 'Uruguay': 'uy',
+      'Austria': 'at', 'Belgium': 'be', 'Bosnia-Herzegovina': 'ba',
+      'Croatia': 'hr', 'Czechia': 'cz', 'England': 'gb-eng',
+      'France': 'fr', 'Germany': 'de', 'Netherlands': 'nl',
+      'Norway': 'no', 'Portugal': 'pt', 'Scotland': 'gb-sct',
+      'Spain': 'es', 'Sweden': 'se', 'Switzerland': 'ch',
+      'Turkey': 'tr', 'Australia': 'au', 'Iran': 'ir',
+      'Japan': 'jp', 'Jordan': 'jo', 'Qatar': 'qa',
+      'Saudi Arabia': 'sa', 'South Korea': 'kr', 'Uzbekistan': 'uz',
+      'Algeria': 'dz', 'Cape Verde Islands': 'cv', 'Egypt': 'eg',
+      'Ghana': 'gh', 'Ivory Coast': 'ci', 'Morocco': 'ma',
+      'Senegal': 'sn', 'South Africa': 'za', 'Tunisia': 'tn',
+      'Curaçao': 'cw', 'Haiti': 'ht', 'Panama': 'pa',
+      'New Zealand': 'nz', 'Congo DR': 'cd', 'Iraq': 'iq',
+    }).map(([k, v]) => [k.toLowerCase(), v]));
+
+    function flagHtml(teamName) {
+      if (!teamName) return '';
+      const code = TEAM_FLAG[teamName.trim().toLowerCase()];
+      if (!code) return '';
+      return `<img src="flags/${code}.png" width="24" height="16" style="border-radius:2px;flex-shrink:0;display:block;" alt="${teamName}">`;
+    }
     // ── APP ────────────────────────────────────────────────────────────────────
     const API = 'https://nowhere-admission-draft-adapters.trycloudflare.com';
     // To use lambda use the url 'https://d369cipp2c.execute-api.us-east-1.amazonaws.com'
@@ -1249,14 +1274,24 @@
       }
       return '<div class="match-card new-card" data-matchid="' + escHtml(m.match_id) + '" onclick="toggleCard(this)">' +
         '<div class="match-row">' +
-        '<div class="team-cell home"><span class="team-name">' + escHtml(homeTeam) + '</span></div>' +
+        '<div class="team-cell home">' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">' +
+        flagHtml(homeTeam) +
+        '<span class="team-name">' + escHtml(homeTeam) + '</span>' +
+        '</div>' +
+        '</div>' +
         '<div class="centre-block">' +
         '<div class="score-display">' + sh + '<span class="score-dash">·</span>' + sa + '</div>' +
         '<div class="match-status">' +
         '<div class="badge ' + meta.badgeCls + '" data-role="badge">' + meta.badgeTxt + '</div>' +
         '<div class="match-time" data-role="time">' + meta.timeStr + '</div>' +
         '</div></div>' +
-        '<div class="team-cell away"><span class="team-name">' + escHtml(awayTeam) + '</span></div>' +
+        '<div class="team-cell away">' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">' +
+        flagHtml(awayTeam) +
+        '<span class="team-name">' + escHtml(awayTeam) + '</span>' +
+        '</div>' +
+        '</div>' +
         '</div>' +
         '<div class="predictions-panel"><div class="predictions-panel-inner">' + predsHtml + '</div></div>' +
         '<div class="pred-sentence" data-matchid="' + escHtml(m.match_id) + '" style="padding:7px 16px 8px;border-top:1px solid var(--rule);background:var(--paper);font-family:\'Barlow Condensed\',sans-serif;font-size:0.82rem;letter-spacing:0.01em;color:var(--ink4);">' +
@@ -1299,8 +1334,16 @@
 
         const homeEl = card.querySelector('.team-cell.home .team-name');
         const awayEl = card.querySelector('.team-cell.away .team-name');
-        if (homeEl) homeEl.textContent = nm.team_home || 'TBD';
-        if (awayEl) awayEl.textContent = nm.team_away || 'TBD';
+        if (homeEl) {
+          homeEl.querySelector('img') && (homeEl.querySelector('img').src = flagHtml(nm.team_home || '') ? `flags/${TEAM_FLAG[nm.team_home]}.png` : '');
+          const hn = homeEl.querySelector('.team-name');
+          if (hn) hn.textContent = nm.team_home || 'TBD';
+        }
+        if (awayEl) {
+          awayEl.querySelector('img') && (awayEl.querySelector('img').src = flagHtml(nm.team_away || '') ? `flags/${TEAM_FLAG[nm.team_away]}.png` : '');
+          const an = awayEl.querySelector('.team-name');
+          if (an) an.textContent = nm.team_away || 'TBD';
+        }
 
         const sh = card.querySelector('[data-role="sh"]');
         const sa = card.querySelector('[data-role="sa"]');
