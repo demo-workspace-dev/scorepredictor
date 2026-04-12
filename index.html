@@ -10,182 +10,17 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700;1,800&family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap"
     rel="stylesheet">
-  <!-- Standard favicons -->
   <link rel="icon" type="image/png" sizes="16x16" href="award-16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="award-32.png">
   <link rel="icon" type="image/png" sizes="64x64" href="award-64.png">
   <link rel="icon" type="image/png" sizes="128x128" href="award-128.png">
-
-  <!-- High-res icons for Chrome / Android -->
   <link rel="icon" type="image/png" sizes="192x192" href="award-256.png">
   <link rel="icon" type="image/png" sizes="512x512" href="award-512.png">
-
-  <!-- Optional but recommended -->
   <link rel="apple-touch-icon" sizes="180x180" href="award-128.png">
-
-  <!-- Manifest (important for Chrome homepage tiles) -->
   <link rel="manifest" href="site.webmanifest">
-
   <meta name="theme-color" content="#ffffff">
   <title>WC2026 Predictor</title>
   <style>
-    .filter-fab {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      left: auto;
-      /* remove the centering */
-      transform: none;
-      /* remove translateX */
-      z-index: 300;
-      pointer-events: none;
-    }
-
-    .filter-fab-btn {
-      pointer-events: all;
-      font-family: "Barlow Condensed", sans-serif;
-      font-weight: 700;
-      font-size: 0.85rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: var(--ink);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      white-space: nowrap;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .filter-fab-btn .fab-accent {
-      color: #5ddb7c;
-      font-size: 0.75rem;
-    }
-
-    .filter-sheet-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 400;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.22s ease;
-      visibility: hidden;
-    }
-
-    .filter-sheet-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-      visibility: visible;
-    }
-
-    .filter-sheet {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #fff;
-      border-radius: 16px 16px 0 0;
-      z-index: 500;
-      transform: translateY(100%);
-      transition: transform 0.28s cubic-bezier(0.34, 1.1, 0.64, 1);
-      padding-bottom: env(safe-area-inset-bottom, 12px);
-    }
-
-    .filter-sheet.open {
-      transform: translateY(0);
-    }
-
-    .sheet-handle {
-      width: 36px;
-      height: 4px;
-      background: rgba(0, 0, 0, 0.12);
-      border-radius: 2px;
-      margin: 12px auto 16px;
-    }
-
-    .sheet-title {
-      font-family: "Barlow Condensed", sans-serif;
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--ink4);
-      padding: 0 20px 10px;
-    }
-
-    .sheet-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 13px 20px;
-      border-top: 1px solid var(--rule);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.15s;
-    }
-
-    .sheet-item:active {
-      background: var(--paper);
-    }
-
-    .sheet-item-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .sheet-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--rule-strong);
-      flex-shrink: 0;
-      transition: background 0.15s;
-    }
-
-    .sheet-dot.active {
-      background: #5ddb7c;
-    }
-
-    .sheet-item-name {
-      font-family: "Barlow Condensed", sans-serif;
-      font-weight: 700;
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ink);
-    }
-
-    .sheet-item-name.active {
-      color: var(--green);
-    }
-
-    .sheet-check {
-      color: #5ddb7c;
-      font-size: 1rem;
-      font-weight: 700;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-
-    .sheet-check.active {
-      opacity: 1;
-    }
-
-    .sheet-hint {
-      font-family: Barlow, sans-serif;
-      font-size: 0.72rem;
-      color: var(--ink4);
-      padding: 10px 20px 16px;
-      border-top: 1px solid var(--rule);
-      font-style: italic;
-    }
-
     :root {
       --paper: #f5f0e8;
       --paper2: #ede8df;
@@ -460,9 +295,6 @@
       max-width: 100%;
       line-height: 1.1;
       color: var(--ink);
-    }
-
-    .team-cell.home .team-name {
       text-align: center;
     }
 
@@ -1109,6 +941,193 @@
       animation: slideUp 0.35s ease both;
     }
 
+    /* ── FILTER FAB ── */
+    .filter-fab {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 300;
+      pointer-events: none;
+    }
+
+    .filter-fab-btn {
+      pointer-events: all;
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      cursor: pointer;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      overflow: hidden;
+      transition: padding 0.35s ease;
+    }
+
+    .filter-fab-icon {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .filter-fab-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: #5ddb7c;
+    }
+
+    .filter-fab-label {
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      opacity: 1;
+      margin-left: 8px;
+      margin-right: 4px;
+      transition: max-width 0.35s ease, opacity 0.2s ease, margin 0.35s ease;
+    }
+
+    .filter-fab-btn.collapsed .filter-fab-label {
+      max-width: 0;
+      opacity: 0;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .fab-accent {
+      color: #5ddb7c;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      transition: max-width 0.35s ease, opacity 0.2s ease;
+      max-width: 20px;
+      overflow: hidden;
+    }
+
+    .filter-fab-btn.collapsed .fab-accent {
+      max-width: 0;
+      opacity: 0;
+    }
+
+    /* ── FILTER SHEET ── */
+    .filter-sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 400;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+      visibility: hidden;
+    }
+
+    .filter-sheet-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+      visibility: visible;
+    }
+
+    .filter-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      z-index: 500;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.34, 1.1, 0.64, 1);
+      padding-bottom: env(safe-area-inset-bottom, 12px);
+    }
+
+    .filter-sheet.open {
+      transform: translateY(0);
+    }
+
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 2px;
+      margin: 12px auto 16px;
+    }
+
+    .sheet-title {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink4);
+      padding: 0 20px 10px;
+    }
+
+    .sheet-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 20px;
+      border-top: 1px solid var(--rule);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+
+    .sheet-item:active {
+      background: var(--paper);
+    }
+
+    .sheet-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sheet-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--rule-strong);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .sheet-dot.active {
+      background: #5ddb7c;
+    }
+
+    .sheet-item-name {
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+    }
+
+    .sheet-item-name.active {
+      color: var(--green);
+    }
+
+    .sheet-check {
+      color: #5ddb7c;
+      font-size: 1rem;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .sheet-check.active {
+      opacity: 1;
+    }
+
     @media(max-width:560px) {
       .header-top {
         padding: 0 16px;
@@ -1175,17 +1194,14 @@
 
       .pred-grid {
         grid-template-columns: 1fr 1fr;
-        /* already 2 cols — keep this */
       }
 
       .pred-item {
         padding: 10px 10px;
-        /* reduce padding slightly */
       }
 
       .pred-input {
         width: 36px;
-        /* slightly smaller inputs on mobile */
         height: 36px;
       }
     }
@@ -1202,7 +1218,7 @@
         </div>
         <button class="sync-btn" id="syncBtn" onclick="syncAll()">
           <span class="sync-icon">&#x21BB;</span>
-          <span class="btn-label">Update Scores</span>
+          <span class="btn-label">Refresh</span>
         </button>
       </div>
     </header>
@@ -1211,6 +1227,7 @@
       <div class="tab" onclick="switchTab('leaderboard',this)">Leaderboard</div>
     </div>
   </div>
+
   <main>
     <div id="predict" class="tab-content active">
       <div id="matchList">
@@ -1223,7 +1240,27 @@
       </div>
     </div>
   </main>
+
   <div class="toast" id="toast"></div>
+
+  <div class="filter-fab">
+    <button class="filter-fab-btn" id="filterFabBtn" onclick="onFabClick()">
+      <span class="filter-fab-icon">
+        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 3h14v1.5l-5 5V14l-4-2V9.5L1 4.5V3z" />
+        </svg>
+      </span>
+      <span class="filter-fab-label" id="fabLabel">All Matches</span>
+      <span class="fab-accent">▾</span>
+    </button>
+  </div>
+
+  <div class="filter-sheet-overlay" id="sheetOverlay" onclick="closeFilterSheet()"></div>
+  <div class="filter-sheet" id="filterSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Show</div>
+    <div id="sheetItems"></div>
+  </div>
 
   <script>
     const TEAM_FLAG = Object.fromEntries(Object.entries({
@@ -1251,9 +1288,9 @@
       if (!code) return '';
       return `<img src="flags/${code}.png" width="24" height="16" style="border-radius:2px;flex-shrink:0;display:block;border:1px solid rgba(0,0,0,0.1);" alt="${teamName}">`;
     }
+
     // ── APP ────────────────────────────────────────────────────────────────────
     const API = 'https://nowhere-admission-draft-adapters.trycloudflare.com';
-    // To use lambda use the url 'https://d369cipp2c.execute-api.us-east-1.amazonaws.com'
     const STAGE_LABEL = { group: 'Group Stage', r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter Finals', sf: 'Semi Finals', third: 'Third Place', final: 'Final' };
     const predBuffer = {};
     const timers = {};
@@ -1280,17 +1317,10 @@
     function getTodayWindow() {
       const now = new Date();
       const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-      const start = new Date(ist);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(ist);
-      end.setDate(end.getDate() + 1);
-      end.setHours(23, 59, 59, 999);
-      // convert back to UTC offset for comparison
+      const start = new Date(ist); start.setHours(0, 0, 0, 0);
+      const end = new Date(ist); end.setDate(end.getDate() + 1); end.setHours(23, 59, 59, 999);
       const offset = now.getTime() - ist.getTime();
-      return {
-        start: new Date(start.getTime() + offset),
-        end: new Date(end.getTime() + offset)
-      };
+      return { start: new Date(start.getTime() + offset), end: new Date(end.getTime() + offset) };
     }
 
     function matchesFilter(m, filter) {
@@ -1299,7 +1329,6 @@
         const { start, end } = getTodayWindow();
         const kickoff = parseUTC(m.kickoff);
         if (!kickoff) return false;
-        // also show finished matches from today window
         return kickoff >= start && kickoff <= end;
       }
       return m.stage === filter;
@@ -1307,8 +1336,7 @@
 
     function getAvailableFilters() {
       const stages = [...new Set(matches.map(m => m.stage))];
-      const filters = ['all', 'today', ...stages];
-      return filters;
+      return ['all', 'today', ...stages];
     }
 
     function getNearestMatch() {
@@ -1318,31 +1346,22 @@
         return k && k > now && m.status !== 'FINISHED';
       });
       if (!upcoming.length) return null;
-      return upcoming.reduce((a, b) => {
-        return parseUTC(a.kickoff) < parseUTC(b.kickoff) ? a : b;
-      });
-    }
-
-    function getTodayHint() {
-      const { end } = getTodayWindow();
-      const opts = { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' };
-      return 'Matches through ' + end.toLocaleDateString('en-IN', opts) + ' IST';
+      return upcoming.reduce((a, b) => parseUTC(a.kickoff) < parseUTC(b.kickoff) ? a : b);
     }
 
     function buildSheetItems() {
       const filters = getAvailableFilters();
       const container = document.getElementById('sheetItems');
       if (!container) return;
-
       container.innerHTML = filters.map(f => {
         const isActive = f === activeFilter;
         return `<div class="sheet-item" onclick="applyFilter('${f}')">
-      <div class="sheet-item-left">
-        <div class="sheet-dot ${isActive ? 'active' : ''}"></div>
-        <div class="sheet-item-name ${isActive ? 'active' : ''}">${FILTER_LABELS[f] || f}</div>
-      </div>
-      <div class="sheet-check ${isActive ? 'active' : ''}">✓</div>
-    </div>`;
+          <div class="sheet-item-left">
+            <div class="sheet-dot ${isActive ? 'active' : ''}"></div>
+            <div class="sheet-item-name ${isActive ? 'active' : ''}">${FILTER_LABELS[f] || f}</div>
+          </div>
+          <div class="sheet-check ${isActive ? 'active' : ''}">✓</div>
+        </div>`;
       }).join('');
     }
 
@@ -1363,11 +1382,11 @@
 
       const label = document.getElementById('fabLabel');
       if (label) label.textContent = FILTER_LABELS[filter] || filter;
+      expandFab();
 
       const container = document.getElementById('matchList');
       if (!container) return;
 
-      // check if today filter has any matches, else fall back to nearest
       if (filter === 'today') {
         const todayMatches = matches.filter(m => matchesFilter(m, 'today'));
         if (!todayMatches.length) {
@@ -1375,7 +1394,7 @@
           if (nearest) {
             const card = container.querySelector(`[data-matchid="${nearest.match_id}"]`);
             if (card) {
-              const top = card.getBoundingClientRect().top + window.scrollY - 170;
+              const top = card.getBoundingClientRect().top + window.scrollY - 120;
               window.scrollTo({ top, behavior: 'smooth' });
             }
             return;
@@ -1383,7 +1402,6 @@
         }
       }
 
-      // hide/show cards and stage headers
       const allCards = container.querySelectorAll('.match-card');
       const allHeaders = container.querySelectorAll('.stage-header');
 
@@ -1391,18 +1409,16 @@
         const mid = card.dataset.matchid;
         const m = matches.find(x => String(x.match_id) === String(mid));
         if (!m) return;
-        card.style.display = matchesFilter(m, filter) ? '' : 'none';
-        // also hide pred-sentence
+        const visible = matchesFilter(m, filter);
+        card.style.display = visible ? '' : 'none';
         const sent = container.querySelector(`.pred-sentence[data-matchid="${mid}"]`);
-        if (sent) sent.style.display = matchesFilter(m, filter) ? '' : 'none';
+        if (sent) sent.style.display = visible ? '' : 'none';
       });
 
-      // hide stage headers if all cards in that stage are hidden
       allHeaders.forEach(header => {
         const stage = header.dataset.stage;
-        const stageCards = container.querySelectorAll(`.match-card[data-matchid]`);
         let anyVisible = false;
-        stageCards.forEach(card => {
+        container.querySelectorAll('.match-card').forEach(card => {
           const mid = card.dataset.matchid;
           const m = matches.find(x => String(x.match_id) === String(mid));
           if (m && m.stage === stage && matchesFilter(m, filter)) anyVisible = true;
@@ -1410,23 +1426,60 @@
         header.style.display = anyVisible ? '' : 'none';
       });
 
-      // scroll to first visible card
       const firstVisible = container.querySelector('.match-card:not([style*="display: none"])');
       if (firstVisible) {
-        const top = firstVisible.getBoundingClientRect().top + window.scrollY - 170;
+        const top = firstVisible.getBoundingClientRect().top + window.scrollY - 120;
         window.scrollTo({ top, behavior: 'smooth' });
       }
     }
 
-    // auto-select today on boot if matches exist for today+tomorrow window
     function autoSelectFilter() {
       const todayMatches = matches.filter(m => matchesFilter(m, 'today'));
-      if (todayMatches.length) {
-        applyFilter('today');
-      }
-      // else stay on 'all', no action needed
+      if (todayMatches.length) applyFilter('today');
     }
 
+    // ── FAB COLLAPSE ───────────────────────────────────────────────────────────
+    let fabCollapseTimer = null;
+    let fabExpanded = true;
+
+    function expandFab() {
+      const btn = document.getElementById('filterFabBtn');
+      if (!btn) return;
+      btn.classList.remove('collapsed');
+      fabExpanded = true;
+      clearTimeout(fabCollapseTimer);
+      fabCollapseTimer = setTimeout(collapseFab, 3500);
+    }
+
+    function collapseFab() {
+      const btn = document.getElementById('filterFabBtn');
+      if (!btn) return;
+      btn.classList.add('collapsed');
+      fabExpanded = false;
+    }
+
+    function onFabClick() {
+      if (!fabExpanded) { expandFab(); return; }
+      openFilterSheet();
+    }
+
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const currentY = window.scrollY;
+      if (currentY < lastScrollY) {
+        expandFab();
+      } else if (currentY > lastScrollY + 10) {
+        clearTimeout(fabCollapseTimer);
+        collapseFab();
+      }
+      lastScrollY = currentY;
+    }, { passive: true });
+
+    function initFab() {
+      fabCollapseTimer = setTimeout(collapseFab, 3500);
+    }
+
+    // ── COUNTDOWN ──────────────────────────────────────────────────────────────
     function tickCountdowns() {
       const now = new Date();
       document.querySelectorAll('.match-countdown').forEach(el => {
@@ -1471,6 +1524,7 @@
         users = ru; matches = rm; sortUsers();
         buildMatchDOM();
         autoSelectFilter();
+        initFab();
       } catch (err) {
         document.getElementById('matchList').innerHTML = '<div class="state-msg">Could not load data. Check your connection.</div>';
         showToast('Failed to load data', true);
@@ -1482,15 +1536,12 @@
       var cards = Array.from({ length: 5 }, function () {
         return '<div class="skel-card">' +
           '<div class="skel sk-team"></div>' +
-          '<div style="display:flex;flex-direction:column;align-items:center;gap:6px">' +
-          '<div class="skel sk-score"></div><div class="skel sk-meta"></div>' +
-          '</div>' +
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="skel sk-score"></div><div class="skel sk-meta"></div></div>' +
           '<div class="skel sk-team"></div>' +
           '</div>';
       }).join('');
       document.getElementById('matchList').innerHTML =
-        '<div class="stage-header"><div class="skel" style="height:12px;width:80px"></div>' +
-        '<div class="stage-rule"></div></div>' + cards;
+        '<div class="stage-header"><div class="skel" style="height:12px;width:80px"></div><div class="stage-rule"></div></div>' + cards;
     }
 
     // ── UTILS ──────────────────────────────────────────────────────────────────
@@ -1577,12 +1628,10 @@
       return '<span style="font-weight:800;color:var(--green)">' + predStr + '</span> predicted';
     }
 
-    // ── ALIGN LAST ROW (pyramid centering) ────────────────────────────────────
+    // ── ALIGN LAST ROW ─────────────────────────────────────────────────────────
     function alignLastPredRow(grid) {
       const items = grid.querySelectorAll('.pred-item');
       if (!items.length) return;
-
-      // Detect actual column count from rendered layout
       const firstTop = items[0].getBoundingClientRect().top;
       let cols = 0;
       for (let i = 0; i < items.length; i++) {
@@ -1590,22 +1639,16 @@
         cols++;
       }
       if (cols < 1) cols = 1;
-
       const remainder = items.length % cols;
       if (remainder === 0) return;
-
-      // Reset all gridColumnStart first
       items.forEach(el => el.style.gridColumnStart = '');
-
       const offset = Math.floor((cols - remainder) / 2) + 1;
       for (let i = items.length - remainder; i < items.length; i++) {
         items[i].style.gridColumnStart = offset + (i - (items.length - remainder));
       }
     }
 
-    window.addEventListener('resize', () => {
-      document.querySelectorAll('.pred-grid').forEach(alignLastPredRow);
-    });
+    window.addEventListener('resize', () => { document.querySelectorAll('.pred-grid').forEach(alignLastPredRow); });
 
     // ── BUILD CARD HTML ────────────────────────────────────────────────────────
     function buildCardHTML(m) {
@@ -1635,8 +1678,7 @@
         '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">' +
         flagHtml(homeTeam) +
         '<span class="team-name">' + escHtml(homeTeam) + '</span>' +
-        '</div>' +
-        '</div>' +
+        '</div></div>' +
         '<div class="centre-block">' +
         '<div class="score-display">' + sh + '<span class="score-dash">·</span>' + sa + '</div>' +
         '<div class="match-status">' +
@@ -1647,8 +1689,7 @@
         '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">' +
         flagHtml(awayTeam) +
         '<span class="team-name">' + escHtml(awayTeam) + '</span>' +
-        '</div>' +
-        '</div>' +
+        '</div></div>' +
         '</div>' +
         '<div class="predictions-panel"><div class="predictions-panel-inner">' + predsHtml + '</div></div>' +
         '<div class="pred-sentence" data-matchid="' + escHtml(m.match_id) + '" style="padding:7px 16px 8px;border-top:1px solid var(--rule);background:var(--paper);font-family:\'Barlow Condensed\',sans-serif;font-size:0.82rem;letter-spacing:0.01em;color:var(--ink4);display:flex;align-items:center;justify-content:space-between;">' +
@@ -1673,9 +1714,7 @@
         html += buildCardHTML(m);
       });
       container.innerHTML = html;
-      requestAnimationFrame(() => {
-        container.querySelectorAll('.pred-grid').forEach(alignLastPredRow);
-      });
+      requestAnimationFrame(() => { container.querySelectorAll('.pred-grid').forEach(alignLastPredRow); });
     }
 
     // ── PATCH DOM ──────────────────────────────────────────────────────────────
@@ -1690,16 +1729,18 @@
 
         const meta = getMatchMeta(nm);
 
-        const homeEl = card.querySelector('.team-cell.home .team-name');
-        const awayEl = card.querySelector('.team-cell.away .team-name');
-        if (homeEl) {
-          homeEl.querySelector('img') && (homeEl.querySelector('img').src = flagHtml(nm.team_home || '') ? `flags/${TEAM_FLAG[nm.team_home]}.png` : '');
-          const hn = homeEl.querySelector('.team-name');
+        const homeCell = card.querySelector('.team-cell.home');
+        const awayCell = card.querySelector('.team-cell.away');
+        if (homeCell) {
+          const img = homeCell.querySelector('img');
+          const hn = homeCell.querySelector('.team-name');
+          if (img) { const code = TEAM_FLAG[(nm.team_home || '').toLowerCase()]; if (code) img.src = 'flags/' + code + '.png'; }
           if (hn) hn.textContent = nm.team_home || 'TBD';
         }
-        if (awayEl) {
-          awayEl.querySelector('img') && (awayEl.querySelector('img').src = flagHtml(nm.team_away || '') ? `flags/${TEAM_FLAG[nm.team_away]}.png` : '');
-          const an = awayEl.querySelector('.team-name');
+        if (awayCell) {
+          const img = awayCell.querySelector('img');
+          const an = awayCell.querySelector('.team-name');
+          if (img) { const code = TEAM_FLAG[(nm.team_away || '').toLowerCase()]; if (code) img.src = 'flags/' + code + '.png'; }
           if (an) an.textContent = nm.team_away || 'TBD';
         }
 
@@ -1711,19 +1752,17 @@
         const badge = card.querySelector('[data-role="badge"]');
         if (badge) { badge.className = 'badge ' + meta.badgeCls; badge.textContent = meta.badgeTxt; }
 
+        const timeEl = card.querySelector('[data-role="time"]');
+        if (timeEl) timeEl.textContent = meta.timeStr;
+
         const sentenceEl = container.querySelector('.pred-sentence[data-matchid="' + nm.match_id + '"]');
         if (sentenceEl) {
           const sentTxt = sentenceEl.querySelector('.pred-sentence-txt');
           if (sentTxt) sentTxt.innerHTML = buildPredSentence(nm, newUsers);
         }
 
-        const timeEl = card.querySelector('[data-role="time"]');
-        if (timeEl) timeEl.textContent = meta.timeStr;
-
-        if (card) {
-          const cd = card.querySelector('.match-countdown');
-          if (cd) cd.dataset.status = nm.status || '';
-        }
+        const cd = card.querySelector('.match-countdown');
+        if (cd) cd.dataset.status = nm.status || '';
 
         newUsers.forEach(function (u) {
           const pred = nm.predictions ? nm.predictions[u.user_id] : null;
@@ -1751,9 +1790,7 @@
           if (inAway) inAway.disabled = meta.locked;
         });
       });
-      requestAnimationFrame(() => {
-        document.querySelectorAll('.pred-grid').forEach(alignLastPredRow);
-      });
+      requestAnimationFrame(() => { document.querySelectorAll('.pred-grid').forEach(alignLastPredRow); });
     }
 
     function toggleCard(card) { card.classList.toggle('open'); }
@@ -1899,7 +1936,7 @@
         showToast('Sync failed', true);
       } finally {
         btn.disabled = false; btn.classList.remove('spinning');
-        if (lbl) lbl.textContent = 'Update Scores';
+        if (lbl) lbl.textContent = 'Refresh';
       }
     }
 
@@ -1940,10 +1977,7 @@
     let slowPoll = null;
     let idleTimeout = null;
 
-    function startFastPoll() {
-      if (fastPoll) return;
-      fastPoll = setInterval(doPoll, 30 * 1000);
-    }
+    function startFastPoll() { if (fastPoll) return; fastPoll = setInterval(doPoll, 30 * 1000); }
 
     function switchToSlowPoll() {
       if (fastPoll) { clearInterval(fastPoll); fastPoll = null; }
@@ -1958,10 +1992,7 @@
 
     boot();
 
-    setTimeout(function () {
-      startFastPoll();
-      resetIdleTimer();
-    }, 3000);
+    setTimeout(function () { startFastPoll(); resetIdleTimer(); }, 3000);
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
@@ -1977,20 +2008,6 @@
     document.addEventListener('click', resetIdleTimer);
     document.addEventListener('keydown', resetIdleTimer);
   </script>
-  <div class="filter-fab">
-    <button class="filter-fab-btn" onclick="openFilterSheet()">
-      <span id="fabLabel">Filter</span>
-      <span class="fab-accent">▾</span>
-    </button>
-  </div>
-
-  <div class="filter-sheet-overlay" id="sheetOverlay" onclick="closeFilterSheet()"></div>
-
-  <div class="filter-sheet" id="filterSheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Show</div>
-    <div id="sheetItems"></div>
-  </div>
 </body>
 
 </html>
