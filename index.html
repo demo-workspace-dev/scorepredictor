@@ -1463,16 +1463,11 @@
       openFilterSheet();
     }
 
-    let lastScrollY = window.scrollY;
     window.addEventListener('scroll', () => {
-      const currentY = window.scrollY;
-      if (currentY < lastScrollY) {
-        expandFab();
-      } else if (currentY > lastScrollY + 10) {
-        clearTimeout(fabCollapseTimer);
-        collapseFab();
-      }
-      lastScrollY = currentY;
+      expandFab(); // expand on any scroll (up or down)
+
+      clearTimeout(fabCollapseTimer);
+      fabCollapseTimer = setTimeout(collapseFab, 1500);
     }, { passive: true });
 
     function initFab() {
