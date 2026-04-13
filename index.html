@@ -1269,7 +1269,7 @@
         img.src = 'flags/' + code + '.png';
       });
     }
-    
+
     const TEAM_FLAG = Object.fromEntries(Object.entries({
       'United States': 'us', 'Canada': 'ca', 'Mexico': 'mx',
       'Argentina': 'ar', 'Brazil': 'br', 'Colombia': 'co',
@@ -1335,10 +1335,22 @@
     function matchesFilter(m, filter) {
       if (filter === 'all') return true;
       if (filter === 'today') {
-        const { start, end } = getTodayWindow();
-        const kickoff = parseUTC(m.kickoff);
-        if (!kickoff) return false;
-        return kickoff >= start && kickoff <= end;
+        const todayMatches = matches.filter(m => matchesFilter(m, 'today'));
+        const container = document.getElementById('matchList');
+        let target = null;
+
+        if (todayMatches.length) {
+          target = container.querySelector(`[data-matchid="${todayMatches[0].match_id}"]`);
+        } else {
+          const nearest = getNearestMatch();
+          if (nearest) target = container.querySelector(`[data-matchid="${nearest.match_id}"]`);
+        }
+
+        if (target) {
+          const top = target.getBoundingClientRect().top + window.scrollY - 120;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+        return; // ← skip all the show/hide logic below
       }
       return m.stage === filter;
     }
@@ -1706,8 +1718,8 @@
         '</div></div>' +
         '</div>' +
         '<div class="predictions-panel"><div class="predictions-panel-inner">' + predsHtml + '</div></div>' +
-        '<div class="pred-sentence" data-matchid="' + escHtml(m.match_id) + '" style="padding:7px 16px 8px;border-top:1px solid var(--rule);background:var(--paper);font-family:\'Barlow Condensed\',sans-serif;font-size:0.82rem;letter-spacing:0.01em;color:var(--ink4);display:flex;align-items:center;justify-content:space-between;">' +
-        '<span class="pred-sentence-txt">' + buildPredSentence(m, users) + '</span>' +
+        '<div class="pred-sentence" data-matchid="' + escHtml(m.match_id) + '" style="padding:7px 16px 8px;border-top:1px solid var(--rule);background:var(--paper);font-family:\'Barlow Condensed\',sans-serif;font-size:0.82rem;letter-spacing:0.01em;color:var(--ink4);display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
+        '<span class="pred-sentence-txt" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + buildPredSentence(m, users) + '</span>' +
         '<span class="match-countdown" data-kickoff="' + escHtml(m.kickoff || '') + '" data-status="' + escHtml(m.status || '') + '" style="font-family:\'Barlow Condensed\',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;color:var(--ink4);white-space:nowrap;"></span>' +
         '</div>' +
         '</div>';
