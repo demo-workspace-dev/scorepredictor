@@ -1480,11 +1480,11 @@
       document.querySelectorAll('.match-countdown').forEach(el => {
         const status = el.dataset.status;
         const kickoff = parseUTC(el.dataset.kickoff);
-        if (!kickoff) { el.textContent = ''; return; }
-        if (status === 'FINISHED') { el.textContent = ''; return; }
+        if (!kickoff) { el.innerHTML = ''; return; }
+        if (status === 'FINISHED') { el.innerHTML = ''; return; }
 
-        const diff = kickoff.getTime() - now.getTime();
-        if (diff <= 0) { el.textContent = ''; return; }
+        const diff = kickoff.getTime() - now.getTime() - 3600000; // lock = 1hr before
+        if (diff <= 0) { el.innerHTML = ''; return; }
 
         const totalSec = Math.floor(diff / 1000);
         const d = Math.floor(totalSec / 86400);
@@ -1492,16 +1492,26 @@
         const m = Math.floor((totalSec % 3600) / 60);
         const s = totalSec % 60;
 
-        let str = '';
-        if (d > 0) str = d + 'd ' + h + 'h ' + m + 'm ' + s + 's';
-        else if (h > 0) str = h + 'h ' + m + 'm ' + s + 's';
-        else str = m + 'm ' + s + 's';
+        let label, dotColor;
+        if (diff >= 86400000) {
+          label = d + 'd ' + h + 'h';
+          dotColor = '#6e6760';
+        } else if (diff >= 3600000) {
+          label = h + 'h ' + m + 'm';
+          dotColor = '#b8860b';
+        } else if (diff >= 60000) {
+          label = m + 'm ' + s + 's';
+          dotColor = '#c0392b';
+        } else {
+          label = s + 's';
+          dotColor = '#c0392b';
+        }
 
-        if (diff < 3600000) el.style.color = 'var(--red)';
-        else if (diff < 86400000) el.style.color = 'var(--gold)';
-        else el.style.color = 'var(--ink4)';
-
-        el.textContent = 'Kickoff in ' + str;
+        el.innerHTML =
+          '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--paper2);border-radius:20px;padding:2px 8px 2px 6px;">' +
+          '<span style="width:6px;height:6px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;display:inline-block;"></span>' +
+          '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;color:' + dotColor + ';">' + label + '</span>' +
+          '</span>';
       });
     }
 
