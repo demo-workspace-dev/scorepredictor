@@ -1263,6 +1263,13 @@
   </div>
 
   <script>
+    function preloadFlags() {
+      Object.values(TEAM_FLAG).forEach(code => {
+        const img = new Image();
+        img.src = 'flags/' + code + '.png';
+      });
+    }
+    
     const TEAM_FLAG = Object.fromEntries(Object.entries({
       'United States': 'us', 'Canada': 'ca', 'Mexico': 'mx',
       'Argentina': 'ar', 'Brazil': 'br', 'Colombia': 'co',
@@ -1281,6 +1288,8 @@
       'Curaçao': 'cw', 'Haiti': 'ht', 'Panama': 'pa',
       'New Zealand': 'nz', 'Congo DR': 'cd', 'Iraq': 'iq',
     }).map(([k, v]) => [k.toLowerCase(), v]));
+
+    preloadFlags();
 
     function flagHtml(teamName) {
       if (!teamName) return '';
