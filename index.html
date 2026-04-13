@@ -1016,6 +1016,13 @@
       opacity: 0;
     }
 
+    /* ── FILTER HIDDEN CLASS ── */
+    .match-card.hidden,
+    .pred-sentence.hidden,
+    .stage-header.hidden {
+      display: none !important;
+    }
+
     /* ── FILTER SHEET ── */
     .filter-sheet-overlay {
       position: fixed;
@@ -1408,16 +1415,18 @@
       const container = document.getElementById('matchList');
       if (!container) return;
 
+      // ── Special case: "Today's Matches" ──
       if (filter === 'today') {
         const todayMatches = matches.filter(m => matchesFilter(m, 'today'));
-        const container = document.getElementById('matchList');
         let target = null;
+
         if (todayMatches.length) {
           target = container.querySelector(`[data-matchid="${todayMatches[0].match_id}"]`);
         } else {
           const nearest = getNearestMatch();
           if (nearest) target = container.querySelector(`[data-matchid="${nearest.match_id}"]`);
         }
+
         if (target) {
           const top = target.getBoundingClientRect().top + window.scrollY - 120;
           window.scrollTo({ top, behavior: 'smooth' });
@@ -1425,37 +1434,55 @@
         return;
       }
 
+      // ── Normal filter (all / group / r16 / qf etc.) ──
       const allCards = container.querySelectorAll('.match-card');
       const allHeaders = container.querySelectorAll('.stage-header');
 
+      // Reset everything first
       allCards.forEach(card => {
+        card.classList.remove('hidden');
         const mid = card.dataset.matchid;
-        const m = matches.find(x => String(x.match_id) === String(mid));
-        if (!m) return;
-        const visible = matchesFilter(m, filter);
-        card.style.display = visible ? '' : 'none';
         const sent = container.querySelector(`.pred-sentence[data-matchid="${mid}"]`);
-        if (sent) sent.style.display = visible ? '' : 'none';
+        if (sent) sent.classList.remove('hidden');
       });
 
-      allHeaders.forEach(header => {
-        const stage = header.dataset.stage;
-        let anyVisible = false;
-        container.querySelectorAll('.match-card').forEach(card => {
+      allHeaders.forEach(header => header.classList.remove('hidden'));
+
+      // Now hide non-matching items
+      if (filter !== 'all') {
+        allCards.forEach(card => {
           const mid = card.dataset.matchid;
           const m = matches.find(x => String(x.match_id) === String(mid));
-          if (m && m.stage === stage && matchesFilter(m, filter)) anyVisible = true;
-        });
-        header.style.display = anyVisible ? '' : 'none';
-      });
+          if (!m) return;
 
-      const firstVisible = container.querySelector('.match-card:not([style*="display: none"])');
+          const visible = matchesFilter(m, filter);
+          if (!visible) {
+            card.classList.add('hidden');
+            const sent = container.querySelector(`.pred-sentence[data-matchid="${mid}"]`);
+            if (sent) sent.classList.add('hidden');
+          }
+        });
+
+        // Hide empty stage headers
+        allHeaders.forEach(header => {
+          const stage = header.dataset.stage;
+          const anyVisible = [...allCards].some(card => {
+            if (card.classList.contains('hidden')) return false;
+            const mid = card.dataset.matchid;
+            const m = matches.find(x => String(x.match_id) === String(mid));
+            return m && m.stage === stage && matchesFilter(m, filter);
+          });
+          if (!anyVisible) header.classList.add('hidden');
+        });
+      }
+
+      // Scroll to first visible match
+      const firstVisible = container.querySelector('.match-card:not(.hidden)');
       if (firstVisible) {
         const top = firstVisible.getBoundingClientRect().top + window.scrollY - 120;
         window.scrollTo({ top, behavior: 'smooth' });
       }
     }
-
     function autoSelectFilter() {
       const todayMatches = matches.filter(m => matchesFilter(m, 'today'));
       if (todayMatches.length) applyFilter('today');
@@ -1720,10 +1747,11 @@
         '</div></div>' +
         '</div>' +
         '<div class="predictions-panel"><div class="predictions-panel-inner">' + predsHtml + '</div></div>' +
-        '<div class="pred-sentence" data-matchid="' + escHtml(m.match_id) + '" style="padding:7px 16px 8px;border-top:1px solid var(--rule);background:var(--paper);font-family:\'Barlow Condensed\',sans-serif;font-size:0.82rem;letter-spacing:0.01em;color:var(--ink4);display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
+        '<div class="pred-sentence" data-matchid="' + escHtml(m.match_id) + '" style="padding:7px 16px 8px;border-top:1px solid var(--rule);background:var(--paper);font-family:\'Barlow Condensed\',sans-serif;font-size:0.82rem;letter-spacing:0.01em;color:var(--ink4);display:flex;align-items:center;gap:8px;overflow:hidden;">' +
         '<span class="pred-sentence-txt" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + buildPredSentence(m, users) + '</span>' +
-        '<span class="match-countdown" data-kickoff="' + escHtml(m.kickoff || '') + '" data-status="' + escHtml(m.status || '') + '" style="flex-shrink:0;white-space:nowrap;"></span>' +
-        '</div>';
+        '<span class="match-countdown" data-kickoff="' + escHtml(m.kickoff || '') + '" data-status="' + escHtml(m.status || '') + '" style="flex-shrink:0;white-space:nowrap;margin-left:auto;"></span>' +
+        '</div>' +
+        '</div>';   // ← closes .match-card
     }
 
     // ── FULL DOM BUILD ─────────────────────────────────────────────────────────
