@@ -1533,7 +1533,7 @@
         if (!kickoff) { el.innerHTML = ''; return; }
         if (status === 'FINISHED') { el.innerHTML = ''; return; }
 
-        const diff = kickoff.getTime() - now.getTime() - 3600000; // lock = 1hr before
+        const diff = kickoff.getTime() - now.getTime();
         if (diff <= 0) { el.innerHTML = ''; return; }
 
         const totalSec = Math.floor(diff / 1000);
@@ -1626,7 +1626,7 @@
     function getMatchMeta(m) {
       var finished = m.status === 'FINISHED';
       var kickoffDt = parseUTC(m.kickoff);
-      var lockTime = kickoffDt ? new Date(kickoffDt.getTime() - 3600000) : null;
+      var lockTime = kickoffDt ? new Date(kickoffDt.getTime() + 3600000) : null;
       var locked = finished || (lockTime && new Date() > lockTime);
       return {
         finished: finished,
